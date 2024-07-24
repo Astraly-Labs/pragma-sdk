@@ -6,7 +6,7 @@ from typing import Optional, List, Tuple
 
 from pragma_sdk.common.fetchers.fetcher_client import FetcherClient
 from pragma_sdk.common.types.client import PragmaClient
-from pragma_sdk.onchain.types.types import ExecutionConfig
+from pragma_sdk.onchain.types.execution_config import ExecutionConfig
 from pragma_sdk.common.logging import get_pragma_sdk_logger
 from pragma_sdk.offchain.client import PragmaAPIClient
 from pragma_sdk.onchain.client import PragmaOnChainClient

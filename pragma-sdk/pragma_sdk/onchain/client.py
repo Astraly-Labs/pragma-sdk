@@ -15,13 +15,13 @@ from pragma_sdk.common.types.client import PragmaClient
 
 from pragma_sdk.onchain.abis.abi import ABIS
 from pragma_sdk.onchain.constants import CHAIN_IDS, CONTRACT_ADDRESSES
+from pragma_sdk.onchain.types.execution_config import ExecutionConfig
 from pragma_sdk.onchain.types import (
     PrivateKey,
     Contract,
     NetworkName,
     ContractAddresses,
     Network,
-    ExecutionConfig,
     PublishEntriesOnChainResult,
 )
 from pragma_sdk.onchain.mixins import (

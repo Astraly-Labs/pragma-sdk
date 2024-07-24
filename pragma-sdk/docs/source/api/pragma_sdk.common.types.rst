@@ -1,4 +1,4 @@
-common types
+Common types
 ===========================
 
 
@@ -41,7 +41,7 @@ Pair
    :undoc-members:
    :show-inheritance:
 
-Other types
+Misc
 --------------------------------
 
 .. automodule:: pragma_sdk.common.types.types

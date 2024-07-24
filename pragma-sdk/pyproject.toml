@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "pragma-sdk"
-version = "2.0.0rc2"
+version = "2.0.0rc3"
 authors = ["0xevolve <matthias@pragma.build>"]
 description = "Core package for rollup-native Pragma Oracle"
 readme = "README.md"
@@ -25,9 +25,13 @@ aioresponses = "^0.7.4"
 requests-mock = "^1.11.0"
 pydantic = "^2.7.4"
 python-dotenv = "^1.0.0"
+pyyaml = "^6.0.1"
 
 [tool.poetry.extras]
 docs = ["sphinx", "enum-tools", "furo", "pallets-sphinx-themes"]
+
+[tool.poetry.group.docs]
+optional = true
 
 [tool.poetry.group.docs.dependencies]
 sphinx = "^7.3.7"

@@ -20,32 +20,34 @@ class FetcherClient:
 
     The client works by setting up fetchers that are provided the assets to fetch and the publisher name.
 
-    ```python
-    pairs = [
-        Pair.from_tickers("BTC","USD"),
-        Pair.from_tickers("ETH","USD"),
-    ]
+    Example usage:
 
-    bitstamp_fetcher = BitstampFetcher(pairs, "publisher_test")
-    gateio_fetcher = GateIOFetcher(pairs, "publisher_test")
+    .. code-block:: python
 
-    fetchers = [
-        bitstamp_fetcher,
-        gateio_fetcher,
-    ]
+        pairs = [
+            Pair.from_tickers("BTC", "USD"),
+            Pair.from_tickers("ETH", "USD"),
+        ]
 
-    fc = FetcherClient()
-    fc.add_fetchers(fetchers)
+        bitstamp_fetcher = BitstampFetcher(pairs, "publisher_test")
+        gateio_fetcher = GateIOFetcher(pairs, "publisher_test")
 
-    await fc.fetch()
-    fc.fetch_sync()
-    ```
+        fetchers = [
+            bitstamp_fetcher,
+            gateio_fetcher,
+        ]
+
+        fc = FetcherClient()
+        fc.add_fetchers(fetchers)
+
+        await fc.fetch()
+        fc.fetch_sync()
 
     You can also set a custom timeout duration as followed:
-    ```python
-    await fc.fetch(timeout_duration=20) # Denominated in seconds (default=10)
-    ```
 
+    .. code-block:: python
+
+        await fc.fetch(timeout_duration=20)  # Denominated in seconds (default=10)
     """
 
     __fetchers: List[FetcherInterfaceT] = []

@@ -1,5 +1,7 @@
-onchain types
-============================
+.. _onchain_other_types:
+
+Onchain types
+-------------
 
 
 

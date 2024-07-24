@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "price-pusher"
-version = "2.0.0rc2"
+version = "2.0.0rc3"
 authors = ["0xevolve <matthias@pragma.build>"]
 description = "Price pushing service for Pragma."
 readme = "README.md"

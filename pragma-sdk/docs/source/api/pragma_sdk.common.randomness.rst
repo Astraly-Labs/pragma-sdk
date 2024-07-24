@@ -1,9 +1,6 @@
-randomness
-================================
+.. _randomness_utils:
 
-
-
-randomness_utils
+ECVRF Code Utils
 -------------------------------------------------
 
 .. automodule:: pragma_sdk.common.randomness.randomness_utils
@@ -11,7 +8,7 @@ randomness_utils
    :undoc-members:
    :show-inheritance:
 
-utils
+Randomness Utils
 -------------------------------------
 
 .. automodule:: pragma_sdk.common.randomness.utils

@@ -6,7 +6,7 @@ This is a quickstart guide to get you up and running with the Pragma SDK.
 Fetch data
 ---------------
 
-To fetch data on 3rd parties API, one can use the `FetcherClient<pragma_sdk.common.fetchers.client.FetcherClient>`.
+To fetch data on 3rd parties API, one can use the `FetcherClient`.
 
 Here is step by step example:
 
@@ -43,9 +43,9 @@ Here is step by step example:
     Also if you want to fetch data synchronously, you can use the :meth:`fetch_sync` method.
 
 Interact with pragma on-chain
----------------
+-----------------------------
 
-To interact with the Pragma on-chain, one can use the `PragmaOnChainClient<pragma_sdk.onchain.client.PragmaOnChainClient>`.
+To interact with the Pragma on-chain, one can use the `PragmaOnChainClient`.
 The client covers most of the external endpoints of the Pragma on-chain contracts.
 Please refer to the complete `documentation <https://docs.pragma.build/Resources/Cairo%201/data-feeds/consuming-data>`_
 
@@ -88,11 +88,11 @@ Here is an example :
 
 
 Interact with pragma off-chain
----------------
+------------------------------
 
 To interact with the Pragma off-chain, one can use the `PragmaOffChainClient<pragma_sdk.offchain.client.PragmaOffChainClient>`.
 The client covers most of the external endpoints of the Pragma off-chain API.
-Please refer to the complete `documentation <https://docs.pragma.build/Resources/PragmApi/overview>`_
+Please refer to the complete `api documentation <https://docs.pragma.build/Resources/PragmApi/overview>`_
 
 An API key is currently needed to interact with the off-chain API. You can get one by contacting us at `support@pragma.build`.
 

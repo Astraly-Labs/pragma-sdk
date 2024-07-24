@@ -1,3 +1,10 @@
+## v2.0.0rc3 (2024-07-24)
+
+### Fix
+
+- ReadTheDocs Deployment
+- Price pusher circular import
+
 ## v2.0.0rc2 (2024-07-23)
 
 ### Feat

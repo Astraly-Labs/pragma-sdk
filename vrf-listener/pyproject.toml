@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "vrf-listener"
-version = "2.0.0rc2"
+version = "2.0.0rc3"
 authors = ["0xevolve <matthias@pragma.build>"]
 description = "VRF pushing service for Pragma."
 readme = "README.md"

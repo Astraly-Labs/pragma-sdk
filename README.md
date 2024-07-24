@@ -2,9 +2,11 @@
 
 [![codecov](https://codecov.io/gh/Astraly-Labs/pragma-sdk/graph/badge.svg?token=98pUFYGHIK)](https://codecov.io/gh/Astraly-Labs/pragma-sdk)
 
-[![Checks](https://github.com/Astraly-Labs/pragma-sdk/actions/workflows/checks.yml/badge.svg)](https://github.com/Astraly-Labs/pragma-sdk/actions/workflows/checks.yml)
+[![Tests](https://github.com/Astraly-Labs/pragma-sdk/actions/workflows/tests.yml/badge.svg)](https://github.com/Astraly-Labs/pragma-sdk/actions/workflows/tests.yml)
 
 [![Package](https://img.shields.io/pypi/v/pragma-sdk)](https://pypi.org/project/pragma-sdk/)
+
+[![Read the Docs](https://img.shields.io/readthedocs/pragma-docs)](https://pragma-docs.readthedocs.io/en/latest/index.html)
 
 ---
 

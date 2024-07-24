@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "checkpointer"
-version = "2.0.0rc2"
+version = "2.0.0rc3"
 authors = ["0xevolve <matthias@pragma.build>"]
 description = "Checkpoints service for Pragma."
 readme = "README.md"
