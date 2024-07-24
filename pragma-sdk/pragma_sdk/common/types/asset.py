@@ -1,20 +1,20 @@
 from typing import Optional, Dict, Tuple, Union
 
 
-from pragma_sdk.common.types.types import DataTypes
+from pragma_sdk.common.types.types import DataTypes, UnixTimestamp
 from pragma_sdk.common.utils import str_to_felt
 
 
 class Asset:
     data_type: DataTypes
     pair_id: int
-    expiration_timestamp: Optional[int]
+    expiration_timestamp: Optional[UnixTimestamp]
 
     def __init__(
         self,
         data_type: DataTypes,
         pair_id: str | int,
-        expiration_timestamp: Optional[int],
+        expiration_timestamp: Optional[UnixTimestamp] = None,
     ):
         if isinstance(pair_id, str):
             pair_id = str_to_felt(pair_id)
@@ -31,11 +31,11 @@ class Asset:
         """
         Serialize method used to interact with Cairo contracts.
         """
-        if self.data_type == DataTypes.SPOT:
-            return {"SpotEntry": self.pair_id}
-        if self.data_type == DataTypes.FUTURE:
-            return {"FutureEntry": (self.pair_id, self.expiration_timestamp)}
-        return {}
+        match self.data_type:
+            case DataTypes.SPOT:
+                return {"SpotEntry": self.pair_id}
+            case DataTypes.FUTURE:
+                return {"FutureEntry": (self.pair_id, self.expiration_timestamp)}
 
     def to_dict(self) -> Dict[str, Union[int, str, None]]:
         return {

@@ -30,4 +30,4 @@
         - run: poetry config repositories.test-pypi https://test.pypi.org/legacy/
         - run: poetry config pypi-token.test-pypi ${{ secrets.TEST_PYPI_API_TOKEN }}
         - run: poetry build -f sdist
-        - run: poetry publish -r test-pypi
+        - run: poetry publish -r test-pypi --skip-existing

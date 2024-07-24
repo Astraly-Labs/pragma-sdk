@@ -18,7 +18,10 @@ def build_publish_message(
     """
 
     message = {
-        "domain": {"name": "Pragma", "version": "1"},
+        # TODO: We want to update `revision` to `1` but that would require some changes
+        # in the `pragma-node` repository - where we check the signature.
+        # See: https://github.com/astraly-labs/pragma-sdk/issues/151
+        "domain": {"name": "Pragma", "version": "1", "chainId": "1", "revision": "0"},
         "primaryType": "Request",
         "message": {
             "action": "Publish",
@@ -28,6 +31,8 @@ def build_publish_message(
             "StarkNetDomain": [
                 {"name": "name", "type": "felt"},
                 {"name": "version", "type": "felt"},
+                {"name": "chainId", "type": "felt"},
+                {"name": "revision", "type": "felt"},
             ],
             "Request": [
                 {"name": "action", "type": "felt"},

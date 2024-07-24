@@ -3,9 +3,9 @@ from typing import List
 from pragma_sdk.common.types.entry import SpotEntry
 from pragma_sdk.common.types.pair import Pair
 
-from pragma_sdk.common.logging import get_stream_logger
+from pragma_sdk.common.logging import get_pragma_sdk_logger
 
-logger = get_stream_logger()
+logger = get_pragma_sdk_logger()
 
 
 class AssetQuantities:

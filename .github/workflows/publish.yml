@@ -24,4 +24,4 @@
         - run: pipx inject poetry poetry-monorepo-dependency-plugin
         - run: poetry config pypi-token.pypi "${{ secrets.PYPI_API_KEY }}"
         - run: poetry build -f sdist
-        - run: poetry publish
+        - run: poetry publish --skip-existing

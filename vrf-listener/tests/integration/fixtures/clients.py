@@ -20,9 +20,9 @@ from tests.integration.constants import (
 from tests.integration.utils import ExtendedPragmaClient
 from tests.integration.utils import read_contract
 
-from pragma_sdk.common.logging import get_stream_logger
+from pragma_sdk.common.logging import get_pragma_sdk_logger
 
-logger = get_stream_logger()
+logger = get_pragma_sdk_logger()
 
 
 @pytest.fixture(
@@ -171,6 +171,7 @@ async def vrf_pragma_client(
         address=FEE_TOKEN_ADDRESS,
         abi=get_erc20_abi(),
         provider=client.account,
+        cairo_version=0,
     )
     # Approve randomness contract to transfer fee tokens
     await erc20_contract.functions["approve"].invoke_v1(

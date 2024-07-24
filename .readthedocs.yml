@@ -1,0 +1,22 @@
+version: 2
+
+build:
+  os: "ubuntu-22.04"
+  apt_packages:
+    - libgmp3-dev
+  tools:
+    python: "3.12"
+  jobs:
+    pre_install:
+      - pip install poetry
+      - poetry export -f requirements.txt --output requirements.txt --without-hashes --extras docs
+
+sphinx:
+  configuration: pragma-sdk/docs/source/conf.py
+  fail_on_warning: true
+
+python:
+  install:
+    - requirements: requirements.txt
+    - method: pip
+      path: .

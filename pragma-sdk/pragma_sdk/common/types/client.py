@@ -3,8 +3,9 @@ from abc import ABC, abstractmethod
 
 from pragma_sdk.common.types.entry import Entry
 from pragma_sdk.common.utils import add_sync_methods
+
 from pragma_sdk.offchain.types import PublishEntriesAPIResult
-from pragma_sdk.onchain.types.types import PublishEntriesOnChainResult
+from pragma_sdk.onchain.types import PublishEntriesOnChainResult
 
 
 @add_sync_methods

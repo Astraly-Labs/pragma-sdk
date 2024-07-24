@@ -6,7 +6,7 @@ import os
 import pytest
 from aioresponses import aioresponses
 
-from pragma_sdk.common.logging import get_stream_logger
+from pragma_sdk.common.logging import get_pragma_sdk_logger
 from pragma_sdk.offchain.client import PragmaAPIClient
 from pragma_sdk.offchain.exceptions import PragmaAPIError
 from pragma_sdk.common.types.pair import Pair
@@ -18,7 +18,7 @@ ACCOUNT_ADDRESS = os.getenv("TESTNET_ACCOUNT_ADDRESS")
 ACCOUNT_PRIVATE_KEY = os.getenv("TESTNET_PRIVATE_KEY")
 
 
-logger = get_stream_logger()
+logger = get_pragma_sdk_logger()
 
 
 API_CLIENT_CONFIGS = {

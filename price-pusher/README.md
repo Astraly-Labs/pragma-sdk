@@ -39,6 +39,12 @@ Options:
   --help                          Show this message and exit
 ```
 
+For example, if you wish to run the `price-pusher` for our offchain API, that would be:
+
+```sh
+poetry run price_pusher -c ./config/config.example.yaml --log-level DEBUG -t offchain -n mainnet -p plain:$PUBLISHER_PV_KEY --publisher-name $PUBLISHER_NAME --publisher-address $PUBLISHER_ADDRESS --api-key $PRAGMA_OFFCHAIN_API_KEY --api-base-url http://localhost:3000
+```
+
 ## Architecture
 
 ![Architecture Diagram](diagram.png)

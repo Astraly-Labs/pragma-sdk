@@ -5,7 +5,7 @@ from sys import stdout
 logger = logging.getLogger(__name__)
 
 
-def get_stream_logger() -> Logger:
+def get_pragma_sdk_logger() -> Logger:
     """
     Return the logger with a stream handler.
     Log format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"

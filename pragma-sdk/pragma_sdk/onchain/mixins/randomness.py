@@ -9,23 +9,24 @@ from starknet_py.net.client_models import EstimatedFee, EventsChunk
 from starknet_py.net.full_node_client import FullNodeClient
 from starknet_py.net.account.account import Account
 
+from pragma_sdk.common.logging import get_pragma_sdk_logger
+from pragma_sdk.common.randomness.utils import (
+    create_randomness,
+    felt_to_secret_key,
+)
+from pragma_sdk.common.types.types import Address
+
+from pragma_sdk.onchain.types import RequestStatus, RandomnessRequest, ExecutionConfig
 from pragma_sdk.onchain.abis.abi import ABIS
 from pragma_sdk.onchain.constants import RANDOMNESS_REQUEST_EVENT_SELECTOR
 from pragma_sdk.onchain.types import Contract
-from pragma_sdk.common.logging import get_stream_logger
 from pragma_sdk.onchain.types import (
     VRFCancelParams,
     VRFRequestParams,
     VRFSubmitParams,
 )
-from pragma_sdk.common.randomness.utils import (
-    create_randomness,
-    felt_to_secret_key,
-)
-from pragma_sdk.common.types.types import Address, ExecutionConfig
-from pragma_sdk.onchain.types import RequestStatus, RandomnessRequest
 
-logger = get_stream_logger()
+logger = get_pragma_sdk_logger()
 
 
 class RandomnessMixin:
@@ -346,7 +347,6 @@ class RandomnessMixin:
     async def handle_random(
         self,
         private_key: int,
-        min_block: int = 0,
         ignore_request_threshold: int = 3,
     ):
         """
@@ -354,13 +354,12 @@ class RandomnessMixin:
         Will submit randomness for requests that are not too old and have not been handled yet.
 
         :param private_key: The private key of the account that will sign the randomness.
-        :param min_block: The minimum block number to consider for randomness requests.
         :param ignore_request_threshold: The number of blocks we ignore requests that are older than.
         """
 
         block_number = await self.full_node_client.get_block_number()
 
-        min_block = max(min_block, block_number - ignore_request_threshold)
+        min_block = max(block_number - ignore_request_threshold, 0)
         logger.info(f"Handle random job running with min_block: {min_block}")
 
         sk = felt_to_secret_key(private_key)

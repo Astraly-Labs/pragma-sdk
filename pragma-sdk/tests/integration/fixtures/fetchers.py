@@ -1,7 +1,7 @@
 import json
 
 import pytest
-from pragma_sdk.common.logging import get_stream_logger
+from pragma_sdk.common.logging import get_pragma_sdk_logger
 from tests.integration.fetchers.fetcher_configs import (
     FETCHER_CONFIGS,
     FUTURE_FETCHER_CONFIGS,
@@ -10,7 +10,7 @@ from tests.integration.fetchers.fetcher_configs import (
 )
 from tests.integration.constants import SAMPLE_PAIRS
 
-logger = get_stream_logger()
+logger = get_pragma_sdk_logger()
 
 
 @pytest.fixture

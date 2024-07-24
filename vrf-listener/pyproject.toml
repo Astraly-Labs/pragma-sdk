@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "vrf-listener"
-version = "0.0.1"
+version = "2.0.0rc2"
 authors = ["0xevolve <matthias@pragma.build>"]
 description = "VRF pushing service for Pragma."
 readme = "README.md"
@@ -49,7 +49,7 @@ format = "ruff format ."
 format_check = "ruff format . --check"
 lint = "ruff check ."
 typecheck = "mypy vrf_listener"
-test_all = "coverage run -m pytest --net=devnet -v --reruns 5 --only-rerun aiohttp.client_exceptions.ClientConnectorError tests/ -s"
+test = "coverage run -m pytest --net=devnet -v --reruns 5 --only-rerun aiohttp.client_exceptions.ClientConnectorError tests/ -s"
 
 [tool.ruff]
 exclude = [
@@ -104,7 +104,7 @@ enable_error_code = ["ignore-without-code", "redundant-expr", "truthy-bool"]
 generate-setup-file = true
 
 [tool.coverage.run]
-source = ["vrf-listener"]
+source = ["vrf_listener"]
 
 [tool.coverage.report]
 omit = ["*_test.py", "tests/*"]

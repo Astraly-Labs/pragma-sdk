@@ -226,8 +226,8 @@ class SpotEntry(Entry):
 
         return SpotEntry(
             pair.id,
-            oracle_response[0],
-            oracle_response[2],
+            oracle_response.price,
+            oracle_response.last_updated_timestamp,
             publisher_name,
             source_name,
             0,
@@ -429,10 +429,10 @@ class FutureEntry(Entry):
         """
         return FutureEntry(
             pair.id,
-            oracle_response[0],
-            oracle_response[2],
+            oracle_response.price,
+            oracle_response.last_updated_timestamp,
             publisher_name,
             source_name,
-            oracle_response[4],
+            oracle_response.expiration_timestamp,
             0,
         )

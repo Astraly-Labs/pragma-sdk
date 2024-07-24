@@ -11,6 +11,14 @@ Contract
    :undoc-members:
    :show-inheritance:
 
+ExecutionConfig
+------------------------------------
+
+.. automodule:: pragma_sdk.onchain.types.execution_config
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 Other types
 ---------------------------------
 

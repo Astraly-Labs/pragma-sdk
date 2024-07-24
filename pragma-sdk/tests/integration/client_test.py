@@ -13,11 +13,10 @@ from pragma_sdk.onchain.client import PragmaOnChainClient
 from pragma_sdk.onchain.types import ContractAddresses, Network
 from pragma_sdk.common.types.entry import FutureEntry, SpotEntry
 from pragma_sdk.common.types.asset import Asset
-from pragma_sdk.common.types.types import DataTypes, ExecutionConfig
+from pragma_sdk.common.types.types import DataTypes
 from pragma_sdk.common.utils import str_to_felt
 from tests.integration.constants import CURRENCIES, USD_PAIRS
 from tests.integration.utils import read_contract, wait_for_acceptance
-from starknet_py.net.client_models import ResourceBounds
 
 
 PUBLISHER_NAME = "PRAGMA"
@@ -225,7 +224,6 @@ async def test_client_oracle_mixin_spot(pragma_client: PragmaOnChainClient):
 
     invocations = await pragma_client.publish_many(
         [spot_entry_1, spot_entry_2],
-        execution_config=ExecutionConfig(auto_estimate=True),
     )
     await invocations[len(invocations) - 1].wait_for_acceptance()
     # Fails for UNKNOWN source
@@ -258,11 +256,6 @@ async def test_client_oracle_mixin_spot(pragma_client: PragmaOnChainClient):
     try:
         invocations = await pragma_client.publish_many(
             [spot_entry_future],
-            execution_config=ExecutionConfig(
-                l1_resource_bounds=ResourceBounds(
-                    max_price_per_unit=500 * 10**9, max_amount=10**7
-                )
-            ),
         )
     except TransactionRevertedError as err:
         # err_msg = "Execution was reverted; failure reason: [0x54696d657374616d7020697320696e2074686520667574757265]"
@@ -283,7 +276,6 @@ async def test_client_oracle_mixin_spot(pragma_client: PragmaOnChainClient):
 
     invocations = await pragma_client.publish_many(
         [spot_entry_1, spot_entry_2],
-        execution_config=ExecutionConfig(auto_estimate=True),
     )
     await invocations[len(invocations) - 1].wait_for_acceptance()
     res = await pragma_client.get_spot(ETH_PAIR)
@@ -323,7 +315,6 @@ async def test_client_oracle_mixin_future(pragma_client: PragmaOnChainClient):
 
     invocations = await pragma_client.publish_many(
         [future_entry_1, future_entry_2],
-        execution_config=ExecutionConfig(auto_estimate=True),
     )
     await invocations[len(invocations) - 1].wait_for_acceptance()
     # Check entries
@@ -357,7 +348,6 @@ async def test_client_oracle_mixin_future(pragma_client: PragmaOnChainClient):
 
     invocations = await pragma_client.publish_many(
         [future_entry_1, future_entry_2],
-        execution_config=ExecutionConfig(auto_estimate=True),
     )
     await invocations[-1].wait_for_acceptance()
     res = await pragma_client.get_future(ETH_PAIR, expiry_timestamp)
@@ -379,11 +369,6 @@ async def test_client_oracle_mixin_future(pragma_client: PragmaOnChainClient):
     try:
         await pragma_client.publish_many(
             [future_entry_future],
-            execution_config=ExecutionConfig(
-                l1_resource_bounds=ResourceBounds(
-                    max_price_per_unit=500 * 10**9, max_amount=10**7
-                ),
-            ),
         )
     except TransactionRevertedError as err:
         # err_msg = "Execution was reverted; failure reason: [0x54696d657374616d7020697320696e2074686520667574757265]"

@@ -4,7 +4,7 @@ from starknet_py.contract import Contract as StarknetContract
 from starknet_py.contract import ContractFunction, InvokeResult
 from starknet_py.net.client_models import SentTransactionResponse
 
-from pragma_sdk.common.types.types import ExecutionConfig
+from pragma_sdk.onchain.types.execution_config import ExecutionConfig
 
 
 class Contract(StarknetContract):  # type: ignore[misc]

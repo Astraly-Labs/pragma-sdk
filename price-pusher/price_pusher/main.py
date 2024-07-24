@@ -2,12 +2,12 @@ import asyncio
 import click
 import logging
 
-from typing import Optional, List
+from typing import Optional, List, Tuple
 
 from pragma_sdk.common.fetchers.fetcher_client import FetcherClient
 from pragma_sdk.common.types.client import PragmaClient
-from pragma_sdk.common.types.types import ExecutionConfig
-from pragma_sdk.common.logging import get_stream_logger
+from pragma_sdk.onchain.types.types import ExecutionConfig
+from pragma_sdk.common.logging import get_pragma_sdk_logger
 from pragma_sdk.offchain.client import PragmaAPIClient
 from pragma_sdk.onchain.client import PragmaOnChainClient
 
@@ -32,7 +32,7 @@ async def main(
     price_configs: List[PriceConfig],
     target: Target,
     network: Network,
-    private_key: str,
+    private_key: str | Tuple[str, str],
     publisher_name: str,
     publisher_address: str,
     rpc_url: Optional[str] = None,
@@ -104,7 +104,7 @@ def _create_client(
     target: Target,
     network: Network,
     publisher_address: str,
-    private_key: str,
+    private_key: str | Tuple[str, str],
     rpc_url: Optional[str] = None,
     api_base_url: Optional[str] = None,
     api_key: Optional[str] = None,
@@ -194,9 +194,16 @@ def _create_client(
 @click.option(
     "-p",
     "--private-key",
+    "raw_private_key",
     type=click.STRING,
     required=True,
-    help="Secret key of the signer. Format: aws:secret_name, plain:secret_key, or env:ENV_VAR_NAME",
+    help=(
+        "Private key of the signer. Format: "
+        "aws:secret_name, "
+        "plain:private_key, "
+        "env:ENV_VAR_NAME, "
+        "or keystore:PATH/TO/THE/KEYSTORE:PASSWORD"
+    ),
 )
 @click.option(
     "--publisher-name",
@@ -241,7 +248,7 @@ def cli_entrypoint(
     target: str,
     network: str,
     rpc_url: Optional[str],
-    private_key: str,
+    raw_private_key: str,
     publisher_name: str,
     publisher_address: str,
     api_base_url: Optional[str],
@@ -277,11 +284,11 @@ def cli_entrypoint(
             raise click.UsageError('⛔ "rpc_url" format is incorrect. It must start with http(...)')
 
     # Update the logger level of the pragma_sdk package
-    sdk_logger = get_stream_logger()
+    sdk_logger = get_pragma_sdk_logger()
     sdk_logger.setLevel(log_level)
 
     setup_logging(logger, log_level)
-    private_key = load_private_key_from_cli_arg(private_key)
+    private_key = load_private_key_from_cli_arg(raw_private_key)
     price_configs: List[PriceConfig] = PriceConfig.from_yaml(config_file)
 
     # Make sure that the API base url does not ends with /

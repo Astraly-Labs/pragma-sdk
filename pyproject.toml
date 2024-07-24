@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "pragma-monorepo"
-version = "2.0.0.rc-0"
+version = "2.0.0rc2"
 description = "Monorepo container"
 license = "MIT"
 authors = ["0xevolve <matthias@pragma.build>"]
@@ -14,7 +14,7 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.commitizen]
 name = "cz_conventional_commits"
-version = "0.2.0"
+version = "2.0.0rc2"
 tag_format = "v$version"
 version_files = [
   "VERSION",
@@ -28,6 +28,9 @@ version_files = [
   "vrf-listener/VERSION",
   "vrf-listener/pyproject.toml:^version",
   "vrf-listener/vrf_listener/__init__.py:^__version",
+  "checkpointer/VERSION",
+  "checkpointer/pyproject.toml:^version",
+  "checkpointer/checkpointer/__init__.py:^__version",
 ]
 update_changelog_on_bump = true
 changelog_incremental = true

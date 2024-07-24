@@ -24,7 +24,6 @@ For more information, see the [project's repository](https://github.com/Astraly-
 - <a href="./vrf_listener">VRF Listener</a>
 - <a href="./pragma-utils">Pragma utils</a>
 
-
 ## Contributing
 
 See the [CONTRIBUTING](./CONTRIBUTING.md) guide.

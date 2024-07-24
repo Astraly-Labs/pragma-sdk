@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "price-pusher"
-version = "0.0.1"
+version = "2.0.0rc2"
 authors = ["0xevolve <matthias@pragma.build>"]
 description = "Price pushing service for Pragma."
 readme = "README.md"
@@ -50,7 +50,7 @@ format_check = "ruff format . --check"
 lint = "ruff check ."
 # TODO: fix all errors and change this
 typecheck = "mypy price_pusher/types.py"
-test_all = "pytest tests"
+test = "coverage run -m pytest -v tests/ -s"
 
 [tool.ruff]
 exclude = [
@@ -105,7 +105,7 @@ enable_error_code = ["ignore-without-code", "redundant-expr", "truthy-bool"]
 generate-setup-file = true
 
 [tool.coverage.run]
-source = ["price-pusher"]
+source = ["price_pusher"]
 
 [tool.coverage.report]
 omit = ["*_test.py", "tests/*"]

@@ -21,20 +21,21 @@ class Currency:
         ethereum_address: Optional[Address] = None,
     ):
         self.id = currency_id
-
         self.decimals = decimals
 
         if isinstance(is_abstract_currency, int):
             is_abstract_currency = bool(is_abstract_currency)
         self.is_abstract_currency = is_abstract_currency
 
-        if starknet_address is None:
-            starknet_address = 0
-        self.starknet_address = starknet_address
+        self.starknet_address = self._validate_address(starknet_address)
+        self.ethereum_address = self._validate_address(ethereum_address)
 
-        if ethereum_address is None:
-            ethereum_address = 0
-        self.ethereum_address = ethereum_address
+    def _validate_address(self, address: Optional[Address]) -> int:
+        if address is None:
+            return 0
+        if isinstance(address, str):
+            return int(address, 16)
+        return address
 
     @classmethod
     def from_asset_config(cls, config: AssetConfig) -> Self:
@@ -78,4 +79,15 @@ class Currency:
             and self.is_abstract_currency == value.is_abstract_currency
             and self.starknet_address == value.starknet_address
             and self.ethereum_address == value.ethereum_address
+        )
+
+    def __hash__(self) -> int:
+        return hash(
+            (
+                self.id,
+                self.decimals,
+                self.is_abstract_currency,
+                self.starknet_address,
+                self.ethereum_address,
+            )
         )

@@ -4,9 +4,9 @@ from typing import List, TypeVar, Any, Callable
 
 from asgiref.sync import async_to_sync
 
-from pragma_sdk.common.logging import get_stream_logger
+from pragma_sdk.common.logging import get_pragma_sdk_logger
 
-logger = get_stream_logger()
+logger = get_pragma_sdk_logger()
 
 T = TypeVar("T")
 F = TypeVar("F", bound=Callable[..., Any])

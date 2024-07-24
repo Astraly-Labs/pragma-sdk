@@ -10,7 +10,7 @@ from starknet_py.net.models import StarknetChainId
 from starknet_py.net.signer.stark_curve_signer import KeyPair, StarkCurveSigner
 
 from pragma_sdk.common.types.entry import Entry, FutureEntry, SpotEntry
-from pragma_sdk.common.types.types import AggregationMode, DataTypes, ExecutionConfig
+from pragma_sdk.common.types.types import AggregationMode, DataTypes
 from pragma_sdk.common.utils import add_sync_methods, get_cur_from_pair
 from pragma_sdk.offchain.signer import OffchainSigner
 from pragma_sdk.offchain.types import Interval, PublishEntriesAPIResult
@@ -116,7 +116,7 @@ class PragmaAPIClient(PragmaClient):
         return EntryResult(pair_id=response["pair_id"], data=response["data"])
 
     async def publish_entries(
-        self, entries: List[Entry], _execution_config: Optional[ExecutionConfig] = None
+        self, entries: List[Entry]
     ) -> Union[PublishEntriesAPIResult, PublishEntriesOnChainResult]:
         """
         Publishes spot and future entries to the Pragma API.

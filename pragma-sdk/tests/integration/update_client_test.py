@@ -5,14 +5,14 @@ import pytest_asyncio
 from starknet_py.contract import Contract, DeclareResult
 from starknet_py.net.client_errors import ClientError
 
-from pragma_sdk.common.logging import get_stream_logger
+from pragma_sdk.common.logging import get_pragma_sdk_logger
 from pragma_sdk.onchain.client import PragmaOnChainClient
 from pragma_sdk.common.utils import str_to_felt
 from tests.integration.utils import get_deployments, read_contract
 from pragma_sdk.common.types.pair import Pair
 from tests.integration.constants import USD_PAIRS
 
-logger = get_stream_logger()
+logger = get_pragma_sdk_logger()
 
 MAX_FEE = 3700000000000000
 PUBLISHER_NAME = "PRAGMA"

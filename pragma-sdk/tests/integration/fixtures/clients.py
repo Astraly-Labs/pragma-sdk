@@ -12,9 +12,9 @@ from pragma_sdk.onchain.client import PragmaOnChainClient
 
 from tests.integration.fixtures.devnet import get_available_port
 
-from pragma_sdk.common.logging import get_stream_logger
+from pragma_sdk.common.logging import get_pragma_sdk_logger
 
-logger = get_stream_logger()
+logger = get_pragma_sdk_logger()
 
 
 @pytest.fixture(
@@ -74,7 +74,6 @@ def forked_client(network_config: Dict[str, Any]) -> PragmaOnChainClient:
         network.upper(),
     ]
     if block_number is not None:
-        print(f"forking starknet at block {block_number}")
         command.extend(["--fork-block-number", str(block_number)])
 
     subprocess.Popen(command)

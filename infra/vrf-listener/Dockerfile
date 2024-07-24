@@ -26,4 +26,4 @@ COPY vrf-listener/ /opt/vrf-listener/
 WORKDIR /opt/vrf-listener
 RUN poetry env use 3.12
 RUN poetry install
-ENTRYPOINT poetry run vrf-listener -n ${NETWORK} --oracle-address ${ORACLE_ADDRESS} --vrf-address ${VRF_ADDRESS} --admin-address ${ADMIN_ADDRESS} --private-key ${PRIVATE_KEY} -t ${CHECK_INTERVAL} --rpc-url ${RPC_URL}
+ENTRYPOINT poetry run vrf-listener -n ${NETWORK} --vrf-address ${VRF_ADDRESS} --admin-address ${ADMIN_ADDRESS} --private-key ${PRIVATE_KEY} -t ${CHECK_INTERVAL} --rpc-url ${RPC_URL}

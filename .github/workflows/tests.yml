@@ -14,19 +14,19 @@
       runs-on: ubuntu-latest
       strategy:
         matrix:
-          package: [pragma-utils, pragma-sdk, price-pusher, vrf-listener]
+          package: [pragma-utils, pragma-sdk, price-pusher, vrf-listener, checkpointer]
         fail-fast: false
       steps:
         - uses: actions/checkout@v3
           with:
             submodules: "true"
+        - uses: CfirTsabari/actions-pipx@v1
+        - name: Install poetry
+          run: pipx install poetry
         - uses: actions/setup-python@v4
           with:
             python-version: ${{ env.PYTHON_VERSION }}
             cache: "poetry"
-        - uses: CfirTsabari/actions-pipx@v1
-        - name: Install poetry
-          run: pipx install poetry
         - name: Install dependencies
           run: |
             cd ${{ matrix.package }}
@@ -59,15 +59,19 @@
               # Use diff to compare the file with its counterpart in the SDK directory
               diff "$file" "pragma-sdk/pragma_sdk/onchain/abis$rel_path" || (echo "Error: $rel_path in pragma-oracle/target does not match with pragma-sdk/pragma_sdk/onchain/abis/" && exit 1) 
             done
-  
-        - name: Install starknet-devnet
-          working-directory: $HOME/.local/bin
+        - name: Install rust
           run: |
-            wget https://github.com/0xSpaceShard/starknet-devnet-rs/releases/download/v0.1.2/starknet-devnet-x86_64-unknown-linux-gnu.tar.gz
-            tar -xf starknet-devnet-x86_64-unknown-linux-gnu.tar.gz
-            echo "$HOME/.local/bin" >> $GITHUB_PATH
-            rm starknet-devnet-x86_64-unknown-linux-gnu.tar.gz
-        
+            curl https://sh.rustup.rs -sSf | sh -s -- -y
+            source $HOME/.cargo/env
+    
+        - name: Verify Rust and Cargo installation
+          run: |
+            rustc --version
+            cargo --version
+    
+        - uses: Swatinem/rust-cache@v2
+        - name: Install starknet-devnet
+          run: cargo install starknet-devnet
         - name: Run tests
           run: |
             cd ${{ matrix.package }}
@@ -75,9 +79,9 @@
               poetry run poe test_client
               poetry run poe test_vrf
               poetry run poe test_fetchers
-              poetry run poe test_all_unit
+              poetry run poe test_unit
             else
-              poetry run poe test_all
+              poetry run poe test
             fi
         - name: Generate coverage in XML
           run: |

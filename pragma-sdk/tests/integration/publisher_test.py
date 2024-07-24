@@ -23,7 +23,6 @@ from pragma_sdk.common.fetchers.future_fetchers import (
     ByBitFutureFetcher,
 )
 from tests.integration.constants import SAMPLE_PAIRS
-from pragma_sdk.common.types.types import ExecutionConfig
 
 ALL_SPOT_FETCHERS = [
     BinanceFetcher,
@@ -71,7 +70,6 @@ async def test_publisher_client_all_assets(pragma_client: PragmaOnChainClient):
     data = await fetcher.fetch(return_exceptions=True)
 
     # Assert that we don't have any exceptions in the response
-    print(data)
     assert all(
         [
             isinstance(entry, SpotEntry) or isinstance(entry, FutureEntry)
@@ -79,6 +77,4 @@ async def test_publisher_client_all_assets(pragma_client: PragmaOnChainClient):
         ]
     )
 
-    await pragma_client.publish_many(
-        data, execution_config=ExecutionConfig(auto_estimate=True)
-    )
+    await pragma_client.publish_many(data)

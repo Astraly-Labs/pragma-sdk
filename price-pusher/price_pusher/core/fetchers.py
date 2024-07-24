@@ -1,7 +1,7 @@
 import logging
 import os
 
-from typing import List
+from typing import List, Set
 
 from pragma_sdk.common.types.pair import Pair
 from pragma_sdk.common.fetchers.fetcher_client import FetcherClient
@@ -46,7 +46,7 @@ def add_all_fetchers(
 def _add_fetchers(
     fetcher_client: FetcherClient,
     fetchers: List[FetcherInterfaceT],
-    pairs: List[Pair],
+    pairs: Set[Pair],
     publisher_name: str,
 ) -> None:
     """
@@ -70,17 +70,17 @@ def _add_fetchers(
 def _add_one_fetcher(
     fetcher: FetcherInterfaceT,
     fetcher_client: FetcherClient,
-    pairs: List[Pair],
+    pairs: Set[Pair],
     publisher_name: str,
 ):
     config = FETCHERS_WITH_API_KEY.get(fetcher, None)
     if config is None:
-        fetcher_client.add_fetcher(fetcher(pairs, publisher_name))
+        fetcher_client.add_fetcher(fetcher(list(pairs), publisher_name))
         return
 
     api_key = os.getenv(config.env_api_key)
     if api_key or config.optional:
-        fetcher_client.add_fetcher(fetcher(pairs, publisher_name, api_key))
+        fetcher_client.add_fetcher(fetcher(list(pairs), publisher_name, api_key))
     else:
         logger.warning(
             f"⚠️ API key for {fetcher.__name__} is missing. "

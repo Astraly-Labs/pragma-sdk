@@ -1,0 +1,113 @@
+[tool.poetry]
+name = "checkpointer"
+version = "2.0.0rc2"
+authors = ["0xevolve <matthias@pragma.build>"]
+description = "Checkpoints service for Pragma."
+readme = "README.md"
+homepage = "https://pragma.build"
+repository = "https://github.com/Astraly-Labs/pragma-sdk"
+documentation = "https://docs.pragma.build"
+classifiers = [
+  "Programming Language :: Python :: 3",
+  "License :: OSI Approved :: MIT License",
+  "Operating System :: OS Independent",
+]
+include = ["checkpointer"]
+packages = [{ include = "checkpointer" }]
+
+[tool.poetry.scripts]
+scheduler = 'checkpointer.main:cli_entrypoint'
+
+[tool.poetry.dependencies]
+python = ">=3.10,<3.13"
+pragma-sdk = { path = "../pragma-sdk", develop = true }
+pragma-utils = { path = "../pragma-utils", develop = true }
+click = "^8.1.0"
+pydantic = "^2.7.4"
+
+[tool.poetry.group.dev.dependencies]
+poethepoet = "^0.26.1"
+ruff = "^0.4"
+mypy = "^1.10"
+coverage = "^7.2.1"
+pytest = "^7.2.2"
+pytest-asyncio = "^0.21.1"
+pytest-mock = "^3.6.1"
+pytest-xdist = "^3.2.1"
+pytest-cov = "^4.0.0"
+setuptools = "^70.1.0"
+pytest-rerunfailures = "^12.0"
+
+[tool.poetry.group.typing.dependencies]
+mypy = "^1.10"
+types-requests = "^2.26.0"
+types-deprecated = "^1.2.9"
+types-pyyaml = "^6.0.12.20240311"
+
+[tool.poe.tasks]
+format = "ruff format ."
+format_check = "ruff format . --check"
+lint = "ruff check ."
+typecheck = "mypy ."
+test = "coverage run -m pytest -v tests -s"
+
+[tool.ruff]
+exclude = [
+  ".direnv",
+  ".eggs",
+  ".git",
+  ".github",
+  ".git-rewrite",
+  ".hg",
+  ".mypy_cache",
+  ".pyenv",
+  ".pytest_cache",
+  ".pytype",
+  ".ruff_cache",
+  ".venv",
+  ".vscode",
+  "__pypackages__",
+  "_build",
+  "build",
+  "site-packages",
+  "venv",
+  ".venv",
+]
+line-length = 100
+indent-width = 4
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["E4", "E7", "E9", "F"]
+fixable = ["ALL"]
+unfixable = []
+dummy-variable-rgx = "^(_+|(_+[a-zA-Z0-9_]*[a-zA-Z0-9]+?))$"
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+skip-magic-trailing-comma = false
+line-ending = "auto"
+
+[tool.mypy]
+python_version = "3.12"
+namespace_packages = true
+explicit_package_bases = true
+show_error_codes = true
+warn_return_any = true
+ignore_missing_imports = true
+exclude = ["tests"]
+mypy_path = ["../pragma-utils", "../pragma-sdk"]
+enable_error_code = ["ignore-without-code", "redundant-expr", "truthy-bool"]
+
+[tool.poetry.build]
+generate-setup-file = true
+
+[tool.coverage.run]
+source = ["checkpointer"]
+
+[tool.coverage.report]
+omit = ["*_test.py", "tests/*"]
+skip_empty = true
+
+[tool.poetry-monorepo.deps]

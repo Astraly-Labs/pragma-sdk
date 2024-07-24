@@ -5,7 +5,7 @@ from starknet_py.net.account.account import Account
 from starknet_py.net.client import Client
 
 from pragma_sdk.onchain.types import Contract
-from pragma_sdk.common.types.types import ExecutionConfig
+from pragma_sdk.onchain.types.execution_config import ExecutionConfig
 from pragma_sdk.common.utils import str_to_felt
 
 

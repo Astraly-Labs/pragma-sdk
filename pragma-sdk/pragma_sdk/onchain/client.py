@@ -1,33 +1,41 @@
 import logging
 from typing import List, Optional, Union
 
-from pragma_sdk.offchain.types import PublishEntriesAPIResult
-from pragma_sdk.onchain.types.types import NetworkName, PublishEntriesOnChainResult
 from starknet_py.net.account.account import Account
 from starknet_py.net.full_node_client import FullNodeClient
 from starknet_py.net.client import Client
 from starknet_py.net.signer.stark_curve_signer import KeyPair, StarkCurveSigner
 from starknet_py.net.models import StarknetChainId
 
+from pragma_sdk.common.exceptions import ClientException
+from pragma_sdk.common.logging import get_pragma_sdk_logger
+from pragma_sdk.common.types.entry import Entry
+from pragma_sdk.common.types.types import Address
+from pragma_sdk.common.types.client import PragmaClient
+
 from pragma_sdk.onchain.abis.abi import ABIS
 from pragma_sdk.onchain.constants import CHAIN_IDS, CONTRACT_ADDRESSES
-from pragma_sdk.onchain.types import Contract
-from pragma_sdk.common.types.entry import Entry
-from pragma_sdk.common.logging import get_stream_logger
+from pragma_sdk.onchain.types import (
+    PrivateKey,
+    Contract,
+    NetworkName,
+    ContractAddresses,
+    Network,
+    ExecutionConfig,
+    PublishEntriesOnChainResult,
+)
 from pragma_sdk.onchain.mixins import (
     NonceMixin,
     OracleMixin,
     PublisherRegistryMixin,
     RandomnessMixin,
 )
-from pragma_sdk.common.types.types import Address
-from pragma_sdk.common.exceptions import ClientException
-from pragma_sdk.common.types.types import ExecutionConfig
-from pragma_sdk.onchain.types import ContractAddresses, Network
 from pragma_sdk.onchain.utils import get_full_node_client_from_network
-from pragma_sdk.common.types.client import PragmaClient
 
-logger = get_stream_logger()
+from pragma_sdk.offchain.types import PublishEntriesAPIResult
+
+
+logger = get_pragma_sdk_logger()
 logger.setLevel(logging.INFO)
 
 
@@ -41,16 +49,23 @@ class PragmaOnChainClient(  # type: ignore[misc]
     """
     Client for interacting with Pragma on Starknet.
 
-    :param network: Target network for the client.
-        Can be a URL string, or one of
-        ``"mainnet"``, ``"sepolia"`` or ``"devnet"``
-    :param account_private_key: Optional private key for requests.  Not necessary if not making network updates
-    :param account_contract_address: Optional account contract address.  Not necessary if not making network updates
+    :param network: Target network for the client. Can be a URL string, or one of
+                    ``"mainnet"``, ``"sepolia"`` or ``"devnet"``
+    :param account_private_key: Optional private key for requests. Not necessary if not making
+                                network updates.
+                                Can be either an hexadecimal string 0x prefixed, an integer or
+                                a KeyStore type.
+                                The KeyStore is a tuple of two string [str, str], which are
+                                ["path/to/the/keystore", "password_to_unlock_the_keystore"].
+    :param account_contract_address: Optional account contract address.  Not necessary if not
+                                     making network updates.
+                                     Can either be an integer or an hexadecimal string 0x prefixed.
     :param contract_addresses_config: Optional Contract Addresses for Pragma contracts.
-        Will default to the provided network but must be set if using non standard contracts.
+                                      Will default to the provided network but must be set if using
+                                      non standard contracts.
     :param port: Optional port to interact with local node. Will default to 5050.
     :param chain_name: A str-representation of the chain if a URL string is given for `network`.
-        Must be one of ``"mainnet"``, ``"sepolia"`` or ``"devnet"``.
+                       Must be one of ``"mainnet"``, ``"sepolia"`` or ``"devnet"``.
     """
 
     is_user_client: bool = False
@@ -63,8 +78,8 @@ class PragmaOnChainClient(  # type: ignore[misc]
     def __init__(
         self,
         network: Network = "sepolia",
-        account_private_key: Optional[int] = None,
-        account_contract_address: Optional[Address] = None,
+        account_private_key: Optional[PrivateKey] = None,
+        account_contract_address: Optional[int | str] = None,
         contract_addresses_config: Optional[ContractAddresses] = None,
         port: Optional[int] = None,
         chain_name: Optional[NetworkName] = None,
@@ -112,7 +127,7 @@ class PragmaOnChainClient(  # type: ignore[misc]
         :param entries: List of Entry objects
         :return: List of InvokeResult objects
         """
-        return await self.publish_many(entries, self.execution_config)
+        return await self.publish_many(entries)
 
     def _setup_contracts(self):
         """
@@ -151,26 +166,25 @@ class PragmaOnChainClient(  # type: ignore[misc]
         )
         return await client.get_balance(token_address)  # type: ignore[no-any-return]
 
-    def set_account(
-        self,
-        chain_id: StarknetChainId,
-        private_key: int,
-        account_contract_address: Address,
-    ):
-        self._setup_account_client(chain_id, private_key, account_contract_address)
+    def _process_secret_key(self, private_key: PrivateKey) -> KeyPair:
+        """Converts a Private Key to a KeyPair."""
+        if isinstance(private_key, int):
+            return KeyPair.from_private_key(private_key)
+        elif isinstance(private_key, tuple):
+            path, password = private_key
+            return KeyPair.from_keystore(path, password)
+        elif isinstance(private_key, str):
+            return KeyPair.from_private_key(int(private_key, 16))
 
     def _setup_account_client(
         self,
         chain_id: StarknetChainId,
-        private_key: str | int,
-        account_contract_address: Address,
+        private_key: PrivateKey,
+        account_contract_address: int | str,
     ):
-        if isinstance(private_key, str):
-            private_key = int(private_key, 16)
-
         self.signer = StarkCurveSigner(
             account_contract_address,
-            KeyPair.from_private_key(private_key),
+            self._process_secret_key(private_key),
             chain_id,
         )
         self.account = Account(
@@ -181,6 +195,8 @@ class PragmaOnChainClient(  # type: ignore[misc]
         self.client = self.account.client
         self.account.get_nonce = self._get_nonce  # pylint: disable=protected-access
         self.is_user_client = True
+        if isinstance(account_contract_address, str):
+            account_contract_address = int(account_contract_address, 16)
         self.account_contract_address = account_contract_address
 
     @property

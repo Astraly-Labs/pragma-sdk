@@ -13,7 +13,7 @@
     build_containers:
       strategy:
         matrix:
-          package: [price-pusher, vrf-listener]
+          package: [price-pusher, vrf-listener, checkpointer]
       runs-on: ubuntu-latest
       steps:
         - uses: actions/checkout@v4
@@ -44,7 +44,7 @@
   
     bump_version:
       needs: [build_containers]
-      if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master')
+      if: github.event_name == 'push' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/master')
       runs-on: ubuntu-latest
       steps:
         - uses: actions/checkout@v3

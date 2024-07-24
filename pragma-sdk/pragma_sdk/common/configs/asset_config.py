@@ -26,7 +26,6 @@ class AssetConfig(BaseModel):
         with open(path, "r") as file:
             assets_configs = yaml.safe_load(file)
         list_configs = [cls(**config) for config in assets_configs]
-        # TODO: verify that assets are unique
         return list_configs
 
     @classmethod
