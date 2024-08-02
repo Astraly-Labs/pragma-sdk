@@ -1,0 +1,31 @@
+- pairs:
+    spot:
+      - BTC/USD
+      - BTC/EUR
+      - WBTC/USD
+      - STETH/USD
+      - ETH/USD
+      - WSTETH/USD
+      - STRK/USD
+      - USDC/USD
+      - USDT/USD
+      - DAI/USD
+  time_difference: 120
+  price_deviation: 0.0025
+
+- pairs:
+    spot:
+      - LORDS/USD
+      - ZEND/USD
+      - NSTR/USD
+  time_difference: 120
+  price_deviation: 0.005
+
+- pairs:
+    future:
+      - BTC/USD
+      - ETH/USD
+      - BTC/USDT
+      - ETH/USDT
+  time_difference: 600
+  price_deviation: 0.05

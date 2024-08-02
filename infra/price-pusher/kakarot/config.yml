@@ -5,10 +5,4 @@ container_environment:
   - region: "eu-west-3"
   - prefix: "/conf/{{ SERVICE_NAME }}/{{ RUN_ENV }}"
   - keys:
-      - TARGET
-      - NETWORK
-      - PRIVATE_KEY
-      - PUBLISHER_NAME
-      - PUBLISHER_ADDRESS
-      - RPC_URL
-      - API_KEY
+      - ARGS
