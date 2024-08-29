@@ -63,6 +63,7 @@ async def main(
                 ignore_request_threshold=ignore_request_threshold,
                 requests_events=events if index_with_apibara else None,
             )
+            events = []
         except Exception as e:
             logger.error(f"⛔ Error while handling randomness request: {e}")
             raise e
