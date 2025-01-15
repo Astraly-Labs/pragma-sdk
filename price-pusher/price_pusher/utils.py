@@ -2,7 +2,8 @@ from typing import List, Union, Optional, TypeVar
 
 from pragma_sdk.offchain.client import PragmaAPIError
 
-T = TypeVar('T')
+T = TypeVar("T")
+
 
 def exclude_none_and_exceptions(
     to_filter: List[Optional[Union[T, BaseException, Exception, PragmaAPIError]]],

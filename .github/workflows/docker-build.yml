@@ -14,7 +14,7 @@ jobs:
     strategy:
       matrix:
         package:
-          [pragma-sdk, price-pusher, vrf-listener, checkpointer, merkle-maker]
+          [pragma-sdk, price-pusher, vrf-listener, checkpointer, merkle-maker, lmax-connector]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4

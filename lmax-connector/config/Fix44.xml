@@ -1,0 +1,199 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<fix major="4" minor="4" servicepack="0" type="FIX">
+  <header>
+    <field name="BeginString" required="Y"/>
+    <field name="BodyLength" required="Y"/>
+    <field name="MsgType" required="Y"/>
+    <field name="SenderCompID" required="Y"/>
+    <field name="TargetCompID" required="Y"/>
+    <field name="MsgSeqNum" required="Y"/>
+    <field name="PossDupFlag" required="N"/>
+    <field name="PossResend" required="N"/>
+    <field name="SendingTime" required="Y"/>
+    <field name="OrigSendingTime" required="N"/>
+  </header>
+  <messages>
+    <message name="Heartbeat" msgcat="admin" msgtype="0">
+      <field name="TestReqID" required="N"/>
+    </message>
+    <message name="TestRequest" msgcat="admin" msgtype="1">
+      <field name="TestReqID" required="Y"/>
+    </message>
+    <message name="ResendRequest" msgcat="admin" msgtype="2">
+      <field name="BeginSeqNo" required="Y"/>
+      <field name="EndSeqNo" required="Y"/>
+    </message>
+    <message name="Reject" msgcat="admin" msgtype="3">
+      <field name="RefSeqNum" required="Y"/>
+      <field name="RefTagID" required="N"/>
+      <field name="RefMsgType" required="N"/>
+      <field name="SessionRejectReason" required="N"/>
+      <field name="Text" required="N"/>
+    </message>
+    <message name="SequenceReset" msgcat="admin" msgtype="4">
+      <field name="GapFillFlag" required="N"/>
+      <field name="NewSeqNo" required="Y"/>
+    </message>
+    <message name="Logout" msgcat="admin" msgtype="5">
+      <field name="Text" required="N"/>
+    </message>
+    <message name="Logon" msgcat="admin" msgtype="A">
+      <field name="EncryptMethod" required="Y"/>
+      <field name="HeartBtInt" required="Y"/>
+      <field name="ResetSeqNumFlag" required="N"/>
+      <field name="MaxMessageSize" required="N"/>
+      <field name="Username" required="N"/>
+      <field name="Password" required="N"/>
+    </message>
+    <message name="MarketDataRequest" msgcat="app" msgtype="V">
+      <field name="MDReqID" required="Y"/>
+      <field name="SubscriptionRequestType" required="Y"/>
+      <field name="MarketDepth" required="Y"/>
+      <field name="MDUpdateType" required="N"/>
+      <field name="AggregatedBook" required="N"/>
+      <component name="MDReqGrp" required="Y"/>
+      <component name="InstrmtMDReqGrp" required="Y"/>
+    </message>
+    <message name="MarketDataSnapshotFullRefresh" msgcat="app" msgtype="W">
+      <field name="MDReqID" required="N"/>
+      <component name="Instrument" required="Y"/>
+      <component name="MDFullGrp" required="Y"/>
+    </message>
+    <message name="MarketDataRequestReject" msgcat="app" msgtype="Y">
+      <field name="MDReqID" required="Y"/>
+      <field name="MDReqRejReason" required="N"/>
+      <field name="Text" required="N"/>
+    </message>
+  </messages>
+  <trailer>
+    <field name="CheckSum" required="Y"/>
+  </trailer>
+  <components>
+    <component name="Instrument">
+      <field name="SecurityID" number="48" type="STRING" required="Y"/>
+      <field name="SecurityIDSource" number="22" type="STRING" required="Y"/>
+    </component>
+    <component name="InstrmtMDReqGrp">
+      <group name="NoRelatedSym" required="Y">
+        <component name="Instrument" required="Y"/>
+      </group>
+    </component>
+    <component name="MDReqGrp">
+      <group name="NoMDEntryTypes" required="Y">
+        <field name="MDEntryType" number="269" type="CHAR" required="Y"/>
+      </group>
+    </component>
+    <component name="MDFullGrp">
+      <group name="NoMDEntries" required="Y">
+        <field name="MDEntryType" number="269" type="CHAR" required="Y"/>
+        <field name="MDEntryPx" number="270" type="PRICE" required="N"/>
+        <field name="MDEntrySize" number="271" type="QTY" required="N"/>
+        <field name="MDEntryDate" number="272" type="UTCDATEONLY" required="N"/>
+        <field name="MDEntryTime" number="273" type="UTCTIMEONLY" required="N"/>
+      </group>
+    </component>
+  </components>
+  <fields>
+    <field name="BeginString" number="8" type="STRING" length="8"/>
+    <field name="BodyLength" number="9" type="LENGTH" length="3"/>
+    <field name="MsgType" number="35" type="STRING" length="2">
+      <value enum="0" description="HEARTBEAT"/>
+      <value enum="1" description="TESTREQUEST"/>
+      <value enum="A" description="LOGON"/>
+      <value enum="2" description="RESENDREQUEST"/>
+      <value enum="3" description="REJECT"/>
+      <value enum="4" description="SEQUENCERESET"/>
+      <value enum="5" description="LOGOUT"/>
+      <value enum="V" description="MARKETDATAREQUEST"/>
+      <value enum="W" description="MARKETDATASNAPSHOTFULLREFRESH"/>
+      <value enum="Y" description="MARKETDATAREJECT"/>
+      <value enum="xt" description="TRACE_SUBSCRIPTION"/>
+    </field>
+    <field name="SenderCompID" number="49" type="STRING"/>
+    <field name="TargetCompID" number="56" type="STRING"/>
+    <field name="MsgSeqNum" number="34" type="SEQNUM"/>
+    <field name="PossDupFlag" number="43" type="BOOLEAN">
+      <value enum="Y" description="POSSDUP"/>
+      <value enum="N" description="ORIGTRANS"/>
+    </field>
+    <field name="PossResend" number="97" type="BOOLEAN">
+      <value enum="Y" description="POSSRESEND"/>
+      <value enum="N" description="ORIGTRANS"/>
+    </field>
+    <field name="SendingTime" number="52" type="UTCTIMESTAMP"/>
+    <field name="OrigSendingTime" number="122" type="UTCTIMESTAMP"/>
+    <field name="TestReqID" number="112" type="STRING"/>
+    <field name="BeginSeqNo" number="7" type="SEQNUM"/>
+    <field name="EndSeqNo" number="16" type="SEQNUM"/>
+    <field name="RefSeqNum" number="45" type="SEQNUM"/>
+    <field name="RefTagID" number="371" type="INT"/>
+    <field name="RefMsgType" number="372" type="STRING"/>
+    <field name="SessionRejectReason" number="373" type="INT">
+      <value enum="11" description="INVALIDMSGTYPE"/>
+      <value enum="99" description="OTHER"/>
+      <value enum="12" description="XMLVALIDATIONERROR"/>
+      <value enum="13" description="TAGAPPEARSMORETHANONCE"/>
+      <value enum="14" description="TAGSPECIFIEDOUTOFREQUIREDORDER"/>
+      <value enum="15" description="REPEATINGGROUPFIELDSOUTOFORDER"/>
+      <value enum="16" description="INCORRECTNUMINGROUPCOUNTFORREPEATINGGROUP"/>
+      <value enum="17" description="NONDATAVALUEINCLUDESFIELDDELIMITERSOHCHARACTER"/>
+      <value enum="0" description="INVALIDTAGNUMBER"/>
+      <value enum="1" description="REQUIREDTAGMISSING"/>
+      <value enum="2" description="TAGNOTDEFINEDFORTHISMESSAGETYPE"/>
+      <value enum="3" description="UNDEFINEDTAG"/>
+      <value enum="4" description="TAGSPECIFIEDWITHOUTAVALUE"/>
+      <value enum="5" description="VALUEISINCORRECTOUTOFRANGEFORTHISTAG"/>
+      <value enum="6" description="INCORRECTDATAFORMATFORVALUE"/>
+      <value enum="7" description="DECRYPTIONPROBLEM"/>
+      <value enum="8" description="SIGNATUREPROBLEM"/>
+      <value enum="9" description="COMPIDPROBLEM"/>
+      <value enum="10" description="SENDINGTIMEACCURACYPROBLEM"/>
+    </field>
+    <field name="Text" number="58" type="STRING"/>
+    <field name="GapFillFlag" number="123" type="BOOLEAN">
+      <value enum="Y" description="GAPFILLMESSAGEMSGSEQNUMFIELDVALID"/>
+      <value enum="N" description="SEQUENCERESETIGNOREMSGSEQNUMNAFORFIXMLNOTUSED"/>
+    </field>
+    <field name="NewSeqNo" number="36" type="SEQNUM"/>
+    <field name="EncryptMethod" number="98" type="INT">
+      <value enum="0" description="NONEOTHER"/>
+    </field>
+    <field name="HeartBtInt" number="108" type="INT"/>
+    <field name="ResetSeqNumFlag" number="141" type="BOOLEAN">
+      <value enum="Y" description="YES"/>
+      <value enum="N" description="NO"/>
+    </field>
+    <field name="MaxMessageSize" number="383" type="LENGTH"/>
+    <field name="Username" number="553" type="STRING"/>
+    <field name="Password" number="554" type="STRING"/>
+    <field name="MDReqID" number="262" type="STRING"/>
+    <field name="SubscriptionRequestType" number="263" type="CHAR">
+      <value enum="1" description="SNAPSHOTUPDATE"/>
+      <value enum="2" description="UNSUBSCRIBE"/>
+    </field>
+    <field name="MarketDepth" number="264" type="INT"/>
+    <field name="MDUpdateType" number="265" type="INT">
+      <value enum="0" description="FULL"/>
+    </field>
+    <field name="AggregatedBook" number="266" type="BOOLEAN"/>
+    <field name="MDReqRejReason" number="281" type="CHAR"/>
+    <field name="CheckSum" number="10" type="STRING" length="3"/>
+    <field name="SecurityID" number="48" type="STRING"/>
+    <field name="SecurityIDSource" number="22" type="STRING">
+      <value enum="8" description="EXCHSYMB"/>
+    </field>
+    <field name="NoRelatedSym" number="146" type="NUMINGROUP"/>
+    <field name="NoMDEntryTypes" number="267" type="NUMINGROUP"/>
+    <field name="MDEntryType" number="269" type="CHAR">
+      <value enum="0" description="BID"/>
+      <value enum="1" description="OFFER"/>
+      <value enum="2" description="TRADE"/>
+    </field>
+    <field name="NoMDEntries" number="268" type="NUMINGROUP"/>
+    <field name="MDEntryPx" number="270" type="PRICE"/>
+    <field name="MDEntrySize" number="271" type="QTY"/>
+    <field name="MDEntryDate" number="272" type="UTCDATEONLY"/>
+    <field name="MDEntryTime" number="273" type="UTCTIMEONLY"/>
+  </fields>
+</fix>

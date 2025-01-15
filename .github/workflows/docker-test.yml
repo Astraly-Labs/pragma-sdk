@@ -9,7 +9,7 @@ jobs:
   build_containers:
     strategy:
       matrix:
-        package: [pragma-sdk, price-pusher, vrf-listener, checkpointer]
+        package: [pragma-sdk, price-pusher, vrf-listener, checkpointer, lmax-connector]
     runs-on: ubuntu-latest
     permissions:
       checks: write

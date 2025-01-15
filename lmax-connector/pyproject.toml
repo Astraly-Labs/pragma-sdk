@@ -1,0 +1,91 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "lmax-connector"
+authors = [
+    {name = "Pragma Labs", email = "contact@pragma.build"}
+]
+description = "Service that connects to LMAX Exchange via FIX 4.4 and pushes EUR/USD prices to Pragma Oracle."
+readme = "README.md"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+]
+requires-python = ">=3.11,<3.13"
+dependencies = [
+    "pragma-sdk",
+    "quickfix-py>=0.0.2",
+    "python-dotenv>=1.0.0",
+]
+
+dynamic = ["version"]
+
+[project.urls]
+homepage = "https://pragma.build"
+repository = "https://github.com/Astraly-Labs/pragma-sdk"
+documentation = "https://docs.pragma.build"
+
+[project.scripts]
+lmax_connector = "lmax_connector.main:main"
+
+[tool.hatch.version]
+path = "lmax_connector/__init__.py"
+
+[tool.uv.sources]
+pragma_sdk = { path = "../pragma-sdk" }
+
+[tool.hatch.metadata]
+allow-direct-references = true
+
+[dependency-groups]
+dev = [
+    "poethepoet>=0.26.1",
+    "ruff>=0.4",
+    "mypy>=1.10",
+    "coverage>=7.2.1",
+    "pytest>=7.2.2",
+    "pytest-asyncio>=0.21.1",
+    "pytest-mock>=3.6.1",
+    "pytest-xdist>=3.2.1",
+    "pytest-cov>=4.0.0",
+    "pytest-rerunfailures>=12.0",
+]
+
+typing = [
+    "mypy>=1.10",
+    "types-requests>=2.26.0",
+    "types-deprecated>=1.2.9",
+]
+
+extra = [
+    { include-group = "dev" },
+    { include-group = "typing" },
+]
+
+[tool.poe.tasks]
+format = "ruff format ."
+format_check = "ruff format . --check"
+lint = "ruff check ."
+typecheck = "mypy lmax_connector"
+test = "coverage run -m pytest -v tests/ -s"
+
+[tool.mypy]
+python_version = "3.12"
+namespace_packages = true
+explicit_package_bases = true
+show_error_codes = true
+warn_return_any = true
+ignore_missing_imports = true
+exclude = ["tests"]
+mypy_path = ["../pragma-sdk"]
+enable_error_code = ["ignore-without-code", "redundant-expr", "truthy-bool"]
+
+[tool.coverage.run]
+source = ["lmax_connector"]
+
+[tool.coverage.report]
+omit = ["*_test.py", "tests/*"]
+skip_empty = true

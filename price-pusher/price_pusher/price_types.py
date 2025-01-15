@@ -15,4 +15,4 @@ LatestOrchestratorPairPrices = Dict[
 ]
 LatestOraclePairPrices = Dict[PairId, Dict[DataTypes, Entry]]
 Target = Literal["onchain", "offchain"]
-Network = Literal["mainnet", "sepolia", "pragma_devnet"] 
+Network = Literal["mainnet", "sepolia", "pragma_devnet"]

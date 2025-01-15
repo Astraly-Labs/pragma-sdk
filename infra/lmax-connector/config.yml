@@ -1,0 +1,9 @@
+path: "/"
+container_port: 8080
+health_check_path: "/"
+container_environment:
+  - region: "eu-west-3"
+  - prefix: "/conf/{{ SERVICE_NAME }}/{{ RUN_ENV }}"
+  - keys:
+      - INFISICAL_ENV
+      - INFISICAL_APP_PATH

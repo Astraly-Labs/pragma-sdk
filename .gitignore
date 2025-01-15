@@ -72,3 +72,8 @@ devnet.pkl
 
 # Mac
 .DS_STORE
+
+# Lmax connector metadata
+lmax-connector/log/
+lmax-connector/store/
+lmax-connector/config/fix_settings.cfg
