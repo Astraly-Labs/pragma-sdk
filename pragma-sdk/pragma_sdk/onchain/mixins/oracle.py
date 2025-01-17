@@ -1,5 +1,5 @@
 import time
-from typing import Callable, Coroutine, Dict, List, Optional, Sequence
+from typing import Callable, Coroutine, Dict, List, Optional, Sequence, cast
 
 from deprecated import deprecated
 from starknet_py.contract import InvokeResult
@@ -78,24 +78,57 @@ class OracleMixin:
             logger.warning("publish_many received no entries to publish. Skipping")
             return []
 
-        spot_entries: List[Entry] = [
-            entry for entry in entries if isinstance(entry, SpotEntry)
-        ]
-        future_entries: List[Entry] = [
-            entry for entry in entries if isinstance(entry, FutureEntry)
-        ]
-        generic_entries: List[Entry] = [
-            entry for entry in entries if isinstance(entry, GenericEntry)
-        ]
+        # Pre-allocate lists with approximate sizes
+        spot_entries = []
+        future_entries = []
+        generic_entries = []
 
+        DECIMAL_ADJUSTMENT = 10**10  # Constant for 18 -> 8 decimal conversion
+        for entry in entries:
+            if isinstance(entry, SpotEntry):
+                spot_entries.append(
+                    SpotEntry(
+                        pair_id=entry.pair_id,
+                        price=entry.price // DECIMAL_ADJUSTMENT,
+                        timestamp=entry.base.timestamp,
+                        source=entry.base.source,
+                        publisher=entry.base.publisher,
+                        volume=entry.volume,
+                    )
+                )
+            elif isinstance(entry, FutureEntry):
+                future_entries.append(
+                    FutureEntry(
+                        pair_id=entry.pair_id,
+                        price=entry.price // DECIMAL_ADJUSTMENT,
+                        timestamp=entry.base.timestamp,
+                        source=entry.base.source,
+                        publisher=entry.base.publisher,
+                        expiry_timestamp=entry.expiry_timestamp,
+                    )
+                )
+            else:  # GenericEntry does not requires conversion
+                generic_entries.append(entry)
+
+        # Batch publish all entries
         invocations = []
-        invocations.extend(await self._publish_entries(spot_entries, DataTypes.SPOT))
-        invocations.extend(
-            await self._publish_entries(future_entries, DataTypes.FUTURE)
-        )
-        invocations.extend(
-            await self._publish_entries(generic_entries, DataTypes.GENERIC)
-        )
+        if spot_entries:
+            invocations.extend(
+                await self._publish_entries(
+                    cast(List[Entry], spot_entries), DataTypes.SPOT
+                )
+            )
+        if future_entries:
+            invocations.extend(
+                await self._publish_entries(
+                    cast(List[Entry], future_entries), DataTypes.FUTURE
+                )
+            )
+        if generic_entries:
+            invocations.extend(
+                await self._publish_entries(generic_entries, DataTypes.GENERIC)
+            )
+
         return invocations
 
     async def _publish_entries(

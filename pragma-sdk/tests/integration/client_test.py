@@ -207,7 +207,7 @@ async def test_client_oracle_mixin_spot(pragma_client: PragmaOnChainClient):
     await wait_for_acceptance(
         await pragma_client.publish_spot_entry(
             BTC_PAIR.id,
-            100,
+            1000000000000,
             timestamp,
             SOURCE_1,
             publisher_name,
@@ -217,13 +217,18 @@ async def test_client_oracle_mixin_spot(pragma_client: PragmaOnChainClient):
     entries = await pragma_client.get_spot_entries(BTC_PAIR.id, sources=[])
     assert entries == [
         SpotEntry(
-            BTC_PAIR.id, 100, timestamp, SOURCE_1, publisher_name, volume=2000000000000
+            BTC_PAIR.id,
+            1000000000000,
+            timestamp,
+            SOURCE_1,
+            publisher_name,
+            volume=2000000000000,
         )
     ]
 
     # Get SPOT
     res = await pragma_client.get_spot(BTC_PAIR.id)
-    assert res.price == 100
+    assert res.price == 1000000000000
     assert res.num_sources_aggregated == 1
     assert res.last_updated_timestamp == timestamp
     assert res.decimals == 8
@@ -236,10 +241,10 @@ async def test_client_oracle_mixin_spot(pragma_client: PragmaOnChainClient):
 
     # Publish many SPOT entries
     spot_entry_1 = SpotEntry(
-        ETH_PAIR.id, 100, timestamp, SOURCE_1, publisher_name, volume=10
+        ETH_PAIR.id, 1000000000000, timestamp, SOURCE_1, publisher_name, volume=10
     )
     spot_entry_2 = SpotEntry(
-        ETH_PAIR.id, 200, timestamp + 10, SOURCE_1, publisher_name, volume=20
+        ETH_PAIR.id, 2000000000000, timestamp + 10, SOURCE_1, publisher_name, volume=20
     )
 
     invocations = await pragma_client.publish_many(
@@ -264,14 +269,19 @@ async def test_client_oracle_mixin_spot(pragma_client: PragmaOnChainClient):
 
     # Return correct price aggregated
     res = await pragma_client.get_spot(ETH_PAIR.id)
-    assert res.price == 200
+    assert res.price == 2000000000000
     assert res.num_sources_aggregated == 1
     assert res.last_updated_timestamp == timestamp + 10
     assert res.decimals == 8
 
     # Fails if timestamp too far in the future (>7min)
     spot_entry_future = SpotEntry(
-        ETH_PAIR.id, 100, timestamp + 450, SOURCE_1, publisher_name, volume=100000000000
+        ETH_PAIR.id,
+        1000000000000,
+        timestamp + 450,
+        SOURCE_1,
+        publisher_name,
+        volume=100000000000,
     )
     try:
         invocations = await pragma_client.publish_many(
@@ -288,10 +298,10 @@ async def test_client_oracle_mixin_spot(pragma_client: PragmaOnChainClient):
         await pragma_client.add_source_for_publisher(publisher_name, SOURCE_2)
     )
     spot_entry_1 = SpotEntry(
-        ETH_PAIR.id, 100, timestamp + 20, SOURCE_1, publisher_name, volume=10
+        ETH_PAIR.id, 1000000000000, timestamp + 20, SOURCE_1, publisher_name, volume=10
     )
     spot_entry_2 = SpotEntry(
-        ETH_PAIR.id, 200, timestamp + 30, SOURCE_2, publisher_name, volume=20
+        ETH_PAIR.id, 2000000000000, timestamp + 30, SOURCE_2, publisher_name, volume=20
     )
 
     invocations = await pragma_client.publish_many(
@@ -299,7 +309,7 @@ async def test_client_oracle_mixin_spot(pragma_client: PragmaOnChainClient):
     )
     await invocations[len(invocations) - 1].wait_for_acceptance()
     res = await pragma_client.get_spot(ETH_PAIR.id)
-    assert res.price == 150
+    assert res.price == 1500000000000
     assert res.num_sources_aggregated == 2
     assert res.last_updated_timestamp == timestamp + 30
     assert res.decimals == 8
@@ -316,7 +326,7 @@ async def test_client_oracle_mixin_future(pragma_client: PragmaOnChainClient):
     expiry_timestamp = timestamp + 1000
     future_entry_1 = FutureEntry(
         BTC_PAIR.id,
-        1000,
+        10000000000000,
         timestamp,
         SOURCE_1,
         publisher_name,
@@ -325,7 +335,7 @@ async def test_client_oracle_mixin_future(pragma_client: PragmaOnChainClient):
     )
     future_entry_2 = FutureEntry(
         BTC_PAIR.id,
-        2000,
+        20000000000000,
         timestamp + 100,
         SOURCE_1,
         publisher_name,
@@ -345,7 +355,7 @@ async def test_client_oracle_mixin_future(pragma_client: PragmaOnChainClient):
 
     # Get FUTURE
     res = await pragma_client.get_future(BTC_PAIR.id, expiry_timestamp)
-    assert res.price == 2000
+    assert res.price == 20000000000000
     assert res.num_sources_aggregated == 1
     assert res.last_updated_timestamp == timestamp + 100
     assert res.decimals == 8
@@ -355,7 +365,7 @@ async def test_client_oracle_mixin_future(pragma_client: PragmaOnChainClient):
     timestamp = int(time.time())
     future_entry_1 = FutureEntry(
         ETH_PAIR.id,
-        100,
+        1000000000000,
         timestamp,
         SOURCE_1,
         publisher_name,
@@ -364,7 +374,7 @@ async def test_client_oracle_mixin_future(pragma_client: PragmaOnChainClient):
     )
     future_entry_2 = FutureEntry(
         ETH_PAIR.id,
-        200,
+        2000000000000,
         timestamp + 10,
         SOURCE_2,
         publisher_name,
@@ -377,7 +387,7 @@ async def test_client_oracle_mixin_future(pragma_client: PragmaOnChainClient):
     )
     await invocations[-1].wait_for_acceptance()
     res = await pragma_client.get_future(ETH_PAIR.id, expiry_timestamp)
-    assert res.price == 150
+    assert res.price == 1500000000000
     assert res.num_sources_aggregated == 2
     assert res.last_updated_timestamp == timestamp + 10
     assert res.decimals == 8
@@ -385,7 +395,7 @@ async def test_client_oracle_mixin_future(pragma_client: PragmaOnChainClient):
     # Fails if timestamp too far in the future (>2min)
     future_entry_future = FutureEntry(
         ETH_PAIR.id,
-        100,
+        1000000000000,
         timestamp + 1000,
         SOURCE_1,
         publisher_name,
@@ -440,11 +450,11 @@ async def test_client_oracle_mixin_get_entry(pragma_client: PragmaOnChainClient)
 
     timestamp = int(time.time())
     spot_entry = SpotEntry(
-        ETH_PAIR.id, 100, timestamp + 40, SOURCE_1, publisher_name, volume=0
+        ETH_PAIR.id, 1000000000000, timestamp + 40, SOURCE_1, publisher_name, volume=0
     )
     future_entry = FutureEntry(
         ETH_PAIR.id,
-        200,
+        2000000000000,
         timestamp + 20,
         SOURCE_1,
         publisher_name,
@@ -460,7 +470,7 @@ async def test_client_oracle_mixin_get_entry(pragma_client: PragmaOnChainClient)
         ETH_PAIR.id, DataTypes.SPOT, publisher_name, SOURCE_1
     )
     assert published_entry.pair_id == ETH_PAIR.id
-    assert published_entry.price == 100
+    assert published_entry.price == 1000000000000
     assert published_entry.volume == 0
     assert published_entry.base.timestamp == timestamp + 40
     assert felt_to_str(published_entry.base.source) == SOURCE_1
@@ -471,7 +481,7 @@ async def test_client_oracle_mixin_get_entry(pragma_client: PragmaOnChainClient)
         ETH_PAIR.id, DataTypes.FUTURE, publisher_name, SOURCE_1
     )
     assert published_entry.pair_id == ETH_PAIR.id
-    assert published_entry.price == 200
+    assert published_entry.price == 2000000000000
     assert published_entry.volume == 20
     assert published_entry.base.timestamp == timestamp + 20
     assert felt_to_str(published_entry.base.source) == SOURCE_1
