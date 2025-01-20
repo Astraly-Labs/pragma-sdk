@@ -1,7 +1,7 @@
 import asyncio
 import json
 import time
-from typing import Any, List
+from typing import Any, List, Optional
 
 from aiohttp import ClientSession
 
@@ -20,7 +20,10 @@ class ByBitFutureFetcher(FetcherInterfaceT):
     SOURCE: str = "BYBIT"
 
     async def fetch_pair(
-        self, pair: Pair, session: ClientSession
+        self,
+        pair: Pair,
+        session: ClientSession,
+        configuration_decimals: Optional[int] = None,
     ) -> Entry | PublisherFetchError:
         url = self.format_url(pair)
 
@@ -41,23 +44,33 @@ class ByBitFutureFetcher(FetcherInterfaceT):
             ):
                 return PublisherFetchError(f"No data found for {pair} from BYBIT")
 
-            return self._construct(pair, result)
+            return self._construct(pair, result, configuration_decimals=configuration_decimals)
 
     async def fetch(
-        self, session: ClientSession
+        self, session: ClientSession, configuration_decimals: Optional[int] = None
     ) -> List[Entry | PublisherFetchError | BaseException]:
         entries = []
         for pair in self.pairs:
-            entries.append(asyncio.ensure_future(self.fetch_pair(pair, session)))
+            entries.append(
+                asyncio.ensure_future(
+                    self.fetch_pair(pair, session, configuration_decimals)
+                )
+            )
         return list(await asyncio.gather(*entries, return_exceptions=True))
 
     def format_url(self, pair: Pair) -> str:
         url = f"{self.BASE_URL}{pair.base_currency.id}{pair.quote_currency.id}"
         return url
 
-    def _construct(self, pair: Pair, result: Any) -> FutureEntry:
+    def _construct(
+        self, pair: Pair, result: Any, configuration_decimals: Optional[int] = None
+    ) -> FutureEntry:
         data = result["result"]["list"][0]
-        decimals = pair.decimals()
+        decimals = (
+            pair.decimals()
+            if configuration_decimals is None
+            else configuration_decimals
+        )
 
         price = float(data["lastPrice"])
         price_int = int(price * (10**decimals))

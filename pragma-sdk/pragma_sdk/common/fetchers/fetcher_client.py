@@ -1,6 +1,6 @@
 import asyncio
 import time
-from typing import List
+from typing import List, Optional
 import logging
 
 import aiohttp
@@ -81,6 +81,7 @@ class FetcherClient:
         filter_exceptions: bool = True,
         return_exceptions: bool = True,
         timeout_duration: int = 20,
+        configuration_decimals: Optional[int] = None,
     ) -> List[Entry | PublisherFetchError | Exception]:
         """
         Fetch data from all fetchers asynchronously.
@@ -113,7 +114,7 @@ class FetcherClient:
                         # Add timeout to the individual fetch operation
                         async with asyncio.timeout(timeout_duration):
                             fetch_start = time.time()
-                            result = await f.fetch(session)
+                            result = await f.fetch(session, configuration_decimals)
                             fetch_time = time.time() - fetch_start
                             logger.debug(
                                 f"Fetcher {i} ({f.__class__.__name__}) completed in {fetch_time:.2f}s"

@@ -77,7 +77,7 @@ class PricePoller(IPricePoller):
         Call the fetcher client `fetch` function to try to retrieve all entries from fetchers.
         """
         new_entries = await self.fetcher_client.fetch(
-            filter_exceptions=True, return_exceptions=True, timeout_duration=10
+            filter_exceptions=True, return_exceptions=True, timeout_duration=3, configuration_decimals=18
         )
         return new_entries
 

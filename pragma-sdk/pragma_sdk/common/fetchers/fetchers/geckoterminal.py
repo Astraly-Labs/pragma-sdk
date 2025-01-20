@@ -92,7 +92,10 @@ class GeckoTerminalFetcher(FetcherInterfaceT):
     SOURCE: str = "GECKOTERMINAL"
 
     async def fetch_pair(
-        self, pair: Pair, session: ClientSession
+        self,
+        pair: Pair,
+        session: ClientSession,
+        configuration_decimals: Optional[int] = None,
     ) -> SpotEntry | PublisherFetchError:
         if pair.quote_currency.id not in ("USD", "USDPLUS"):
             return await self.operate_usd_hop(pair, session)
@@ -117,13 +120,16 @@ class GeckoTerminalFetcher(FetcherInterfaceT):
                     f"No data found for {pair} from GeckoTerminal"
                 )
 
-        return self._construct(pair, result)
+        return self._construct(pair, result, configuration_decimals=configuration_decimals)
 
     async def fetch(
-        self, session: ClientSession
+        self, session: ClientSession, configuration_decimals: Optional[int] = None
     ) -> List[Entry | PublisherFetchError | BaseException]:
         entries = [
-            asyncio.ensure_future(self.fetch_pair(pair, session)) for pair in self.pairs
+            asyncio.ensure_future(
+                self.fetch_pair(pair, session, configuration_decimals)
+            )
+            for pair in self.pairs
         ]
         return list(await asyncio.gather(*entries, return_exceptions=True))
 
@@ -133,7 +139,10 @@ class GeckoTerminalFetcher(FetcherInterfaceT):
         return url
 
     async def operate_usd_hop(
-        self, pair: Pair, session: ClientSession
+        self,
+        pair: Pair,
+        session: ClientSession,
+        configuration_decimals: Optional[int] = None,
     ) -> SpotEntry | PublisherFetchError:
         pool_1 = ASSET_MAPPING.get(pair.base_currency.id)
         pool_2 = ASSET_MAPPING.get(pair.quote_currency.id)
@@ -182,14 +191,22 @@ class GeckoTerminalFetcher(FetcherInterfaceT):
                 return PublisherFetchError(
                     f"No data found for {pair} from GeckoTerminal"
                 )
-        return self._construct(pair, result, hop_result)
+        return self._construct(pair, result, hop_result, configuration_decimals=configuration_decimals)
 
     def _construct(
-        self, pair: Pair, result: Any, hop_result: Optional[Any] = None
+        self,
+        pair: Pair,
+        result: Any,
+        hop_result: Optional[Any] = None,
+        configuration_decimals: Optional[int] = None,
     ) -> SpotEntry:
         data = result["data"]["attributes"]
         price = float(data["price_usd"])
-        decimals = pair.decimals()
+        decimals = (
+            pair.decimals()
+            if configuration_decimals is None
+            else configuration_decimals
+        )
         if hop_result is not None:
             hop_price = float(hop_result["data"]["attributes"]["price_usd"])
             price_int = int(hop_price / price * 10**decimals)

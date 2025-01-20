@@ -27,7 +27,11 @@ class HuobiFetcher(FetcherInterfaceT):
     )
 
     async def fetch_pair(
-        self, pair: Pair, session: ClientSession, usdt_price: float = 1
+        self,
+        pair: Pair,
+        session: ClientSession,
+        usdt_price: float = 1,
+        configuration_decimals: Optional[int] = None,
     ) -> SpotEntry | PublisherFetchError:
         new_pair = self.hop_handler.get_hop_pair(pair) or pair
         url = self.format_url(new_pair)
@@ -36,15 +40,24 @@ class HuobiFetcher(FetcherInterfaceT):
                 return PublisherFetchError(f"No data found for {pair} from Huobi")
             result = await resp.json()
             if result["status"] != "ok":
-                return await self.operate_usdt_hop(pair, session)
-            return self._construct(pair=pair, result=result, usdt_price=usdt_price)
+                return await self.operate_usdt_hop(
+                    pair, session, configuration_decimals
+                )
+            return self._construct(
+                pair=pair,
+                result=result,
+                usdt_price=usdt_price,
+                configuration_decimals=configuration_decimals,
+            )
 
     async def fetch(
-        self, session: ClientSession
+        self, session: ClientSession, configuration_decimals: Optional[int] = None
     ) -> List[Entry | PublisherFetchError | BaseException]:
         usdt_price = await self.get_stable_price("USDT")
         entries = [
-            asyncio.ensure_future(self.fetch_pair(pair, session, usdt_price))
+            asyncio.ensure_future(
+                self.fetch_pair(pair, session, usdt_price, configuration_decimals)
+            )
             for pair in self.pairs
         ]
         return list(await asyncio.gather(*entries, return_exceptions=True))
@@ -54,7 +67,10 @@ class HuobiFetcher(FetcherInterfaceT):
         return url
 
     async def operate_usdt_hop(
-        self, pair: Pair, session: ClientSession
+        self,
+        pair: Pair,
+        session: ClientSession,
+        configuration_decimals: Optional[int] = None,
     ) -> SpotEntry | PublisherFetchError:
         url_pair1 = self.format_url(
             Pair(
@@ -88,7 +104,12 @@ class HuobiFetcher(FetcherInterfaceT):
                 return PublisherFetchError(
                     f"No data found for {pair} from Huobi - hop failed for {pair.quote_currency}"
                 )
-        return self._construct(pair=pair, result=pair2_usdt, hop_result=pair1_usdt)
+        return self._construct(
+            pair=pair,
+            result=pair2_usdt,
+            hop_result=pair1_usdt,
+            configuration_decimals=configuration_decimals,
+        )
 
     def _construct(
         self,
@@ -96,6 +117,7 @@ class HuobiFetcher(FetcherInterfaceT):
         result: Any,
         hop_result: Optional[Any] = None,
         usdt_price: float = 1,
+        configuration_decimals: Optional[int] = None,
     ) -> SpotEntry:
         bid = float(result["tick"]["bid"][0])
         ask = float(result["tick"]["ask"][0])
@@ -106,7 +128,11 @@ class HuobiFetcher(FetcherInterfaceT):
             hop_price = (hop_bid + hop_ask) / 2
             price = hop_price / price
         timestamp = int(time.time())
-        price_int = int(price * (10 ** pair.decimals()))
+        price_int = (
+            int(price * (10 ** pair.decimals()))
+            if configuration_decimals is None
+            else int(price * (10**configuration_decimals))
+        )
         volume = float(result["tick"]["vol"]) if hop_result is None else 0
         logger.debug("Fetched price %d for %s from Huobi", price_int, pair)
 

@@ -1,6 +1,6 @@
 import asyncio
 import time
-from typing import Any, List
+from typing import Any, List, Optional
 
 from aiohttp import ClientSession
 
@@ -18,20 +18,26 @@ class BitstampFetcher(FetcherInterfaceT):
     SOURCE: str = "BITSTAMP"
 
     async def fetch_pair(
-        self, pair: Pair, session: ClientSession
+        self,
+        pair: Pair,
+        session: ClientSession,
+        configuration_decimals: Optional[int] = None,
     ) -> SpotEntry | PublisherFetchError:
         url = self.format_url(pair)
         async with session.get(url) as resp:
             if resp.status == 404:
                 return PublisherFetchError(f"No data found for {pair} from Bitstamp")
 
-            return self._construct(pair, await resp.json())
+            return self._construct(pair, await resp.json(), configuration_decimals=configuration_decimals)
 
     async def fetch(
-        self, session: ClientSession
+        self, session: ClientSession, configuration_decimals: Optional[int] = None
     ) -> List[Entry | PublisherFetchError | BaseException]:
         entries = [
-            asyncio.ensure_future(self.fetch_pair(pair, session)) for pair in self.pairs
+            asyncio.ensure_future(
+                self.fetch_pair(pair, session, configuration_decimals)
+            )
+            for pair in self.pairs
         ]
         return list(await asyncio.gather(*entries, return_exceptions=True))
 
@@ -39,10 +45,16 @@ class BitstampFetcher(FetcherInterfaceT):
         url = f"{self.BASE_URL}/{pair.base_currency.id.lower()}{pair.quote_currency.id.lower()}"
         return url
 
-    def _construct(self, pair: Pair, result: Any) -> SpotEntry:
+    def _construct(
+        self, pair: Pair, result: Any, configuration_decimals: Optional[int] = None
+    ) -> SpotEntry:
         timestamp = int(time.time())
         price = float(result["last"])
-        price_int = int(price * (10 ** pair.decimals()))
+        price_int = (
+            int(price * (10 ** pair.decimals()))
+            if configuration_decimals is None
+            else int(price * (10**configuration_decimals))
+        )
 
         logger.debug("Fetched price %d for %s from Bitstamp", price_int, pair)
 

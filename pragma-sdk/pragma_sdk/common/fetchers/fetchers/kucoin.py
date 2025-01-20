@@ -28,7 +28,11 @@ class KucoinFetcher(FetcherInterfaceT):
     )
 
     async def fetch_pair(
-        self, pair: Pair, session: ClientSession, usdt_price=1
+        self,
+        pair: Pair,
+        session: ClientSession,
+        usdt_price=1,
+        configuration_decimals: Optional[int] = None,
     ) -> SpotEntry | PublisherFetchError:
         new_pair = self.hop_handler.get_hop_pair(pair) or pair
         url = self.format_url(new_pair)
@@ -37,15 +41,28 @@ class KucoinFetcher(FetcherInterfaceT):
                 return PublisherFetchError(f"No data found for {pair} from Kucoin")
             result = await resp.json()
             if result["data"] is None:
-                return await self.operate_usdt_hop(pair, session)
-            return self._construct(pair=pair, result=result, usdt_price=usdt_price)
+                return await self.operate_usdt_hop(
+                    pair, session, configuration_decimals
+                )
+            return self._construct(
+                pair=pair,
+                result=result,
+                usdt_price=usdt_price,
+                configuration_decimals=configuration_decimals,
+            )
 
     async def fetch(
-        self, session: ClientSession
+        self, session: ClientSession, configuration_decimals: Optional[int] = None
     ) -> List[Entry | PublisherFetchError | BaseException]:
         entries = []
         for pair in self.pairs:
-            entries.append(asyncio.ensure_future(self.fetch_pair(pair, session)))
+            entries.append(
+                asyncio.ensure_future(
+                    self.fetch_pair(
+                        pair, session, configuration_decimals=configuration_decimals
+                    )
+                )
+            )
         return list(await asyncio.gather(*entries, return_exceptions=True))
 
     def format_url(self, pair: Pair) -> str:
@@ -53,7 +70,10 @@ class KucoinFetcher(FetcherInterfaceT):
         return url
 
     async def operate_usdt_hop(
-        self, pair: Pair, session: ClientSession
+        self,
+        pair: Pair,
+        session: ClientSession,
+        configuration_decimals: Optional[int] = None,
     ) -> SpotEntry | PublisherFetchError:
         url_pair1 = self.format_url(
             Pair(
@@ -87,7 +107,12 @@ class KucoinFetcher(FetcherInterfaceT):
                 return PublisherFetchError(
                     f"No data found for {pair} from Kucoin - hop failed for {pair.quote_currency}"
                 )
-        return self._construct(pair=pair, result=pair2_usdt, hop_result=pair1_usdt)
+        return self._construct(
+            pair=pair,
+            result=pair2_usdt,
+            hop_result=pair1_usdt,
+            configuration_decimals=configuration_decimals,
+        )
 
     def _construct(
         self,
@@ -95,13 +120,18 @@ class KucoinFetcher(FetcherInterfaceT):
         result: Any,
         hop_result: Optional[Any] = None,
         usdt_price: float = 1,
+        configuration_decimals: Optional[int] = None,
     ) -> SpotEntry:
         price = float(result["data"]["price"]) / usdt_price
         if hop_result is not None:
             hop_price = float(hop_result["data"]["price"])
             price = hop_price / price
         timestamp = int(time.time())
-        price_int = int(price * (10 ** pair.decimals()))
+        price_int = (
+            int(price * (10 ** pair.decimals()))
+            if configuration_decimals is None
+            else int(price * (10**configuration_decimals))
+        )
         logger.debug("Fetched price %d for %s from Kucoin", price_int, pair)
 
         return SpotEntry(

@@ -1,6 +1,6 @@
 import asyncio
 import time
-from typing import Any, List
+from typing import Any, List, Optional
 
 from aiohttp import ClientSession
 
@@ -19,20 +19,26 @@ class CoinbaseFetcher(FetcherInterfaceT):
     SOURCE: str = "COINBASE"
 
     async def fetch_pair(
-        self, pair: Pair, session: ClientSession
+        self,
+        pair: Pair,
+        session: ClientSession,
+        configuration_decimals: Optional[int] = None,
     ) -> SpotEntry | PublisherFetchError:
         url = self.format_url(pair)
         async with session.get(url) as resp:
             if resp.status == 404:
                 return PublisherFetchError(f"No data found for {pair} from Coinbase")
             result = await resp.json()
-            return self._construct(pair, result)
+            return self._construct(pair, result, configuration_decimals=configuration_decimals)
 
     async def fetch(
-        self, session: ClientSession
+        self, session: ClientSession, configuration_decimals: Optional[int] = None
     ) -> List[Entry | PublisherFetchError | BaseException]:
         entries = [
-            asyncio.ensure_future(self.fetch_pair(pair, session)) for pair in self.pairs
+            asyncio.ensure_future(
+                self.fetch_pair(pair, session, configuration_decimals)
+            )
+            for pair in self.pairs
         ]
         return list(await asyncio.gather(*entries, return_exceptions=True))
 
@@ -40,11 +46,17 @@ class CoinbaseFetcher(FetcherInterfaceT):
         url = self.BASE_URL + pair.base_currency.id
         return url
 
-    def _construct(self, pair: Pair, result: Any) -> SpotEntry | PublisherFetchError:
+    def _construct(
+        self, pair: Pair, result: Any, configuration_decimals: Optional[int] = None
+    ) -> SpotEntry | PublisherFetchError:
         if pair.base_currency.id in result["data"]["rates"]:
             rate = float(result["data"]["rates"][pair.base_currency.id])
             price = 1 / rate
-            price_int = int(price * (10 ** pair.decimals()))
+            price_int = (
+                int(price * (10 ** pair.decimals()))
+                if configuration_decimals is None
+                else int(price * (10**configuration_decimals))
+            )
             timestamp = int(time.time())
 
             logger.debug("Fetched price %d for %s from Coinbase", price_int, pair)

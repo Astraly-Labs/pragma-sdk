@@ -27,7 +27,11 @@ class GateioFetcher(FetcherInterfaceT):
     )
 
     async def fetch_pair(
-        self, pair: Pair, session: ClientSession, usdt_price: float = 1
+        self,
+        pair: Pair,
+        session: ClientSession,
+        usdt_price: float = 1,
+        configuration_decimals: Optional[int] = None,
     ) -> SpotEntry | PublisherFetchError:
         new_pair = self.hop_handler.get_hop_pair(pair) or pair
         url = self.format_url(new_pair)
@@ -36,17 +40,26 @@ class GateioFetcher(FetcherInterfaceT):
                 return PublisherFetchError(f"No data found for {pair} from GATEIO")
             result = await resp.json()
             if resp.status == 400:
-                return await self.operate_usdt_hop(pair, session)
-            return self._construct(pair=pair, result=result, usdt_price=usdt_price)
+                return await self.operate_usdt_hop(
+                    pair, session, configuration_decimals
+                )
+            return self._construct(
+                pair=pair,
+                result=result,
+                usdt_price=usdt_price,
+                configuration_decimals=configuration_decimals,
+            )
 
     async def fetch(
-        self, session: ClientSession
+        self, session: ClientSession, configuration_decimals: Optional[int] = None
     ) -> List[Entry | PublisherFetchError | BaseException]:
         entries = []
         usdt_price = await self.get_stable_price("USDT")
         for pair in self.pairs:
             entries.append(
-                asyncio.ensure_future(self.fetch_pair(pair, session, usdt_price))
+                asyncio.ensure_future(
+                    self.fetch_pair(pair, session, usdt_price, configuration_decimals)
+                )
             )
         return list(await asyncio.gather(*entries, return_exceptions=True))
 
@@ -55,7 +68,10 @@ class GateioFetcher(FetcherInterfaceT):
         return url
 
     async def operate_usdt_hop(
-        self, pair: Pair, session: ClientSession
+        self,
+        pair: Pair,
+        session: ClientSession,
+        configuration_decimals: Optional[int] = None,
     ) -> SpotEntry | PublisherFetchError:
         url_pair1 = self.format_url(
             Pair(
@@ -89,7 +105,12 @@ class GateioFetcher(FetcherInterfaceT):
                 return PublisherFetchError(
                     f"No data found for {pair} from Gate.io - hop failed for {pair.quote_currency.id}"
                 )
-        return self._construct(pair=pair, result=pair2_usdt, hop_result=pair1_usdt)
+        return self._construct(
+            pair=pair,
+            result=pair2_usdt,
+            hop_result=pair1_usdt,
+            configuration_decimals=configuration_decimals,
+        )
 
     def _construct(
         self,
@@ -97,6 +118,7 @@ class GateioFetcher(FetcherInterfaceT):
         result: Any,
         hop_result: Optional[Any] = None,
         usdt_price: float = 1,
+        configuration_decimals: Optional[int] = None,
     ) -> SpotEntry:
         bid = float(result[0]["highest_bid"])
         ask = float(result[0]["lowest_ask"])
@@ -108,7 +130,11 @@ class GateioFetcher(FetcherInterfaceT):
             price = hop_price / price
         timestamp = int(time.time())
         volume = int(float(result[0]["quote_volume"])) if hop_result is None else 0
-        price_int = int(price * (10 ** pair.decimals()))
+        price_int = (
+            int(price * (10 ** pair.decimals()))
+            if configuration_decimals is None
+            else int(price * (10**configuration_decimals))
+        )
 
         logger.debug("Fetched price %d for %s from Gate.io", price_int, pair)
 

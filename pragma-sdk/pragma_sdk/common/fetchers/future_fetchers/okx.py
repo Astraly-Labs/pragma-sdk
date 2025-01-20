@@ -2,7 +2,7 @@ import asyncio
 import json
 import time
 
-from typing import Any, List, Union
+from typing import Any, List, Union, Optional
 
 from aiohttp import ClientSession
 
@@ -39,7 +39,10 @@ class OkxFutureFetcher(FetcherInterfaceT):
         return f"{self.TIMESTAMP_URL}?instType=FUTURES&instId={instrument_id}"
 
     async def fetch_pair(  # type: ignore[override]
-        self, pair: Pair, session: ClientSession
+        self,
+        pair: Pair,
+        session: ClientSession,
+        configuration_decimals: Optional[int] = None,
     ) -> PublisherFetchError | FutureEntry:
         url = self.format_url(pair)
         async with session.get(url) as resp:
@@ -58,22 +61,36 @@ class OkxFutureFetcher(FetcherInterfaceT):
                 or result["msg"] == "Instrument ID does not exist"
             ):
                 return PublisherFetchError(f"No data found for {pair} from OKX")
-            return self._construct(pair, result["data"][0], 0)
+            return self._construct(pair, result["data"][0], 0, configuration_decimals=configuration_decimals)
 
     async def fetch(
-        self, session: ClientSession
+        self, session: ClientSession, configuration_decimals: Optional[int] = None
     ) -> List[Entry | PublisherFetchError | BaseException]:
         entries = []
         for pair in self.pairs:
-            entries.append(asyncio.ensure_future(self.fetch_pair(pair, session)))
+            entries.append(
+                asyncio.ensure_future(
+                    self.fetch_pair(pair, session, configuration_decimals)
+                )
+            )
         return list(await asyncio.gather(*entries, return_exceptions=True))
 
     def format_url(self, pair: Pair) -> str:
         url = f"{self.BASE_URL}?instType=SWAP&uly={pair.base_currency.id}-{pair.quote_currency.id}"
         return url
 
-    def _construct(self, pair: Pair, data: Any, expiry_timestamp: int) -> FutureEntry:
-        decimals = pair.decimals()
+    def _construct(
+        self,
+        pair: Pair,
+        data: Any,
+        expiry_timestamp: int,
+        configuration_decimals: Optional[int] = None,
+    ) -> FutureEntry:
+        decimals = (
+            pair.decimals()
+            if configuration_decimals is None
+            else configuration_decimals
+        )
         price = float(data["last"])
         price_int = int(price * (10**decimals))
         volume = float(data["volCcy24h"])

@@ -3,7 +3,7 @@ import json
 import time
 
 from datetime import datetime, timezone
-from typing import Any, List
+from typing import Any, List, Optional
 
 from aiohttp import ClientSession
 
@@ -21,7 +21,10 @@ class BinanceFutureFetcher(FetcherInterfaceT):
     SOURCE: str = "BINANCE"
 
     async def fetch_pair(  # type: ignore[override]
-        self, pair: Pair, session: ClientSession
+        self,
+        pair: Pair,
+        session: ClientSession,
+        configuration_decimals: Optional[int] = None,
     ) -> FutureEntry | PublisherFetchError:
         url = self.format_url(pair)
         async with session.get(url) as resp:
@@ -38,14 +41,18 @@ class BinanceFutureFetcher(FetcherInterfaceT):
             if "code" in result:
                 return PublisherFetchError(f"No data found for {pair} from Binance")
 
-            return self._construct(pair, result)
+            return self._construct(pair, result, configuration_decimals=configuration_decimals)
 
     async def fetch(
-        self, session: ClientSession
+        self, session: ClientSession, configuration_decimals: Optional[int] = None
     ) -> List[Entry | PublisherFetchError | BaseException]:
         entries = []
         for pair in self.pairs:
-            entries.append(asyncio.ensure_future(self.fetch_pair(pair, session)))
+            entries.append(
+                asyncio.ensure_future(
+                    self.fetch_pair(pair, session, configuration_decimals)
+                )
+            )
         return list(await asyncio.gather(*entries, return_exceptions=True))
 
     def format_url(self, pair: Pair) -> str:
@@ -57,8 +64,13 @@ class BinanceFutureFetcher(FetcherInterfaceT):
         self,
         pair: Pair,
         data: Any,
+        configuration_decimals: Optional[int] = None,
     ) -> list[FutureEntry] | PublisherFetchError:
-        decimals = pair.decimals()
+        decimals = (
+            pair.decimals()
+            if configuration_decimals is None
+            else configuration_decimals
+        )
         price = float(data["markPrice"])
         price_int = int(price * (10**decimals))
         volume = 0  # TODO: Implement volume

@@ -1,7 +1,7 @@
 import asyncio
 import json
 import time
-from typing import Any, List
+from typing import Any, List, Optional
 
 import requests
 from aiohttp import ClientSession
@@ -28,12 +28,15 @@ class IndexCoopFetcher(FetcherInterfaceT):
     SOURCE: str = "INDEXCOOP"
 
     async def fetch_pair(
-        self, pair: Pair, session: ClientSession
+        self,
+        pair: Pair,
+        session: ClientSession,
+        configuration_decimals: Optional[int] = None,
     ) -> SpotEntry | PublisherFetchError:
         url = self.format_url(pair)
         async with session.get(url) as resp:
             content_type = resp.headers.get("Content-Type", "")
-            if "application/json" not in content_type:
+            if "application /json" not in content_type:
                 response_text = await resp.text()
                 if not response_text:
                     return PublisherFetchError(
@@ -42,14 +45,18 @@ class IndexCoopFetcher(FetcherInterfaceT):
                 parsed_data = json.loads(response_text)
                 logger.warning("Unexpected content type received: %s", content_type)
 
-            return self._construct(pair, parsed_data)
+            return self._construct(pair, parsed_data, configuration_decimals=configuration_decimals)
 
     async def fetch(
-        self, session: ClientSession
+        self, session: ClientSession, configuration_decimals: Optional[int] = None
     ) -> List[Entry | PublisherFetchError | BaseException]:
         entries = []
         for pair in self.pairs:
-            entries.append(asyncio.ensure_future(self.fetch_pair(pair, session)))
+            entries.append(
+                asyncio.ensure_future(
+                    self.fetch_pair(pair, session, configuration_decimals)
+                )
+            )
         return list(await asyncio.gather(*entries, return_exceptions=True))
 
     def format_url(self, pair: Pair) -> str:
@@ -79,10 +86,16 @@ class IndexCoopFetcher(FetcherInterfaceT):
             for symbol, quantities in quantities.items()
         ]
 
-    def _construct(self, pair: Pair, result: Any) -> SpotEntry:
+    def _construct(
+        self, pair: Pair, result: Any, configuration_decimals: Optional[int] = None
+    ) -> SpotEntry:
         timestamp = int(time.time())
         price = result["navPrice"]
-        decimals = pair.decimals()
+        decimals = (
+            pair.decimals()
+            if configuration_decimals is None
+            else configuration_decimals
+        )
         price_int = int(price * (10**decimals))
         volume = int(float(result["volume24h"]) * (10**decimals))
 
